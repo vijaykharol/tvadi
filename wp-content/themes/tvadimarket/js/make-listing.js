@@ -418,6 +418,7 @@ function showUserChat(parent_id, c_user_id, btn){
                     if(resss.html != ''){
                         jQuery('#tvadi-user-messages-section').html('');
                         jQuery('#tvadi-user-messages-section').html(resss.html);
+                        jQuery('#tvadi-user-messages-section').attr('data-parent', parent_id);
                         emojiTrigger();
                         scrollToBottom();
                     }

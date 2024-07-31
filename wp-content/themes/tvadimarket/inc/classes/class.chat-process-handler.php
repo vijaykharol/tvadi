@@ -8,6 +8,7 @@ if(!defined('ABSPATH')){
 if(!class_exists('TvadiChatProcessHandler', false)){
     class TvadiChatProcessHandler{
         public static function init(){
+            require_once get_template_directory().'/inc/pusher/vendor/autoload.php';
             add_action( 'wp_ajax_add_contact_process', [__CLASS__, 'add_contact_process_cb'] );
             add_action( 'wp_ajax_nopriv_add_contact_process', [__CLASS__, 'add_contact_process_cb'] );
 
@@ -18,6 +19,10 @@ if(!class_exists('TvadiChatProcessHandler', false)){
             //Show user chat messages
             add_action( 'wp_ajax_show_user_chats', [__CLASS__, 'show_user_chats_cb'] );
             add_action( 'wp_ajax_nopriv_show_user_chats', [__CLASS__, 'show_user_chats_cb'] );
+
+            //update user chat screen.
+            add_action( 'wp_ajax_update_chat_screen', [__CLASS__, 'update_chat_screen_cb'] );
+            add_action( 'wp_ajax_nopriv_update_chat_screen', [__CLASS__, 'update_chat_screen_cb'] );
         }
         
         public static function add_contact_process_cb(){
@@ -145,6 +150,13 @@ if(!class_exists('TvadiChatProcessHandler', false)){
                         }
                         $html .= '</ul>';
                     }
+
+                    
+
+                    $pusher                           =   new Pusher\Pusher("46a9b86b75fe0364ed37", "1a56e77c16e73ecab2d1", "1841899", array('cluster' => 'ap2'));
+                    $pusher_data['parent_id']         =   $parent;
+                    $pusher->trigger('aware-gift-30', 'chatbot-new-message', $pusher_data);
+
                     $return['status']   =   true;
                     $return['message']  =   'Message Sent Successfully!';
                     $return['html']     =   $html;
@@ -280,6 +292,102 @@ if(!class_exists('TvadiChatProcessHandler', false)){
             $uinfo 		  	=   get_userdata($id);
             $userdisp		=   (!empty($first)  || !empty($last)) ? $first.' '.$last : $uinfo->display_name;
             return $userdisp;
+        }
+
+        public static function update_chat_screen_cb(){
+            global $wpdb;
+            $parent_id  =   (isset($_POST['parent_id'])) ? $_POST['parent_id'] : '';
+            $c_user_id  =   get_current_user_id();
+            $return     =   [];
+            if(empty($parent_id) || empty($c_user_id)){
+                $return['status']   =   false;
+                $return['message']  =   'Something went wrong please try again. Thanks!';
+            }else{
+                $chatUser   =  $wpdb->get_row("SELECT * FROM `".$wpdb->prefix."chat_main_tbl` WHERE id='$parent_id' LIMIT 1");
+                $html       = '';
+                if(!empty($chatUser)){
+                    if(!empty($chatUser->contact_user_1) && $c_user_id != $chatUser->contact_user_1){
+                        $chatuser_id = $chatUser->contact_user_1;
+                    }else{
+                        $chatuser_id = $chatUser->contact_user_2;
+                    }
+                    $chatuserprofile_pic  =   (!empty(get_user_meta($chatuser_id, 'profile_picture', true))) ? get_user_meta($chatuser_id, 'profile_picture', true) : get_avatar_url($chatuser_id);
+                    $chat_firstname 	  =   get_user_meta($chatuser_id, 'first_name', true) ? get_user_meta($chatuser_id, 'first_name', true) : '';
+                    $chat_lastname 		  =   get_user_meta($chatuser_id, 'last_name', true) ? get_user_meta($chatuser_id, 'last_name', true) : '';
+                    $chatuser_info 		  =   get_userdata($chatuser_id);
+                    $chat_userDisp	 	  =   (!empty($chat_firstname)  || !empty($chat_lastname)) ? $chat_firstname.' '.$chat_lastname : $chatuser_info->display_name;
+                    
+                    $html .=
+                    '<div class="chat-content-section">
+                        <div class="contact-profile">
+                            <img src="'.$chatuserprofile_pic.'" alt="" class="img-contact-user">
+                            <p>'.$chat_userDisp.'</p>
+                        </div>';
+
+                        $messages = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."chats_tbl` WHERE parent_id='$parent_id' ORDER BY sent_datetime ASC");
+                        if(!empty($messages)){
+                            $html .= '
+                            <div class="messages" id="message-content-section">
+                                <ul class="submessages">';
+                                    foreach($messages as $msg){
+                                        $attachments = $msg->attachments;
+                                        if($c_user_id == $msg->sender){
+                                            $status = 'replies';
+                                        }else{
+                                            $status = 'sent';
+                                        }
+                                        $msguser 			= 	$msg->sender;
+                                        if($msguser == $c_user_id){
+                                            $chatmsg_username 	= 	'';
+                                        }else{
+                                            $chatmsg_username 	= 	self::get_username_by_id($msguser).',';
+                                        }
+                                        $html .= '<li class="'.$status.'">';
+                                        if(!empty($attachments)){
+                                            $attachmentsData = explode(',', $attachments);
+                                            if(!empty($attachmentsData) && is_array(($attachmentsData))){
+                                                foreach($attachmentsData as $adata){
+                                                    $url = site_url().'/wp-content/uploads/chat-attachments/'.$adata;
+                                                    $html .= '<span class="attc"><img class="attachments" src="'.$url.'"></span>';
+                                                }
+                                            }
+                                        }
+                                        if(!empty($msg->message)){
+                                            $html .= '<p>'.$msg->message.'</p>';
+                                        }
+                                        $html .= '<span class="msginfo">'.$chatmsg_username.' '.$msg->sent_datetime.'</span>';
+                                        $html .= '</li>';
+                                    }
+                                $html .='
+                                </ul>
+                            </div>';
+                        }else{
+                            $html .= '<div class="messages" id="message-content-section"><p class="startconversation">Start Messaging!</p></div>';
+                        }
+                        $html .= '
+                        <div class="message-input">
+                            <div id="image-preview"></div>
+                            <div class="wrap">
+                                <textarea id="message-text" placeholder="Write your message..." name="message"></textarea>
+                                <input type="hidden" name="sender_id" id="sender-id" value="'.$c_user_id.'">
+                                <input type="hidden" name="receiver_id" id="receiver-id" value="'.$chatuser_id.'">
+                                <input type="hidden" name="parent_id" id="parent-id" value="'.$parent_id.'">
+                                <input type="file" id="file-input" name="attachments[]" accept="image/*" multiple style="display:none;">
+                                <button id="attach-file-btn"><i class="fa fa-paperclip" aria-hidden="true"></i></button>
+                                <button class="submit" id="send-message-btn"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
+                            </div>
+                        </div>
+                    </div>';
+                    $return['status']   =   true;
+                    $return['message']  =   'Processed Successfully!';
+                    $return['html']     =   $html;
+                }else{
+                    $return['status']   =   false;
+                    $return['message']  =   'Something went wrong please try again. Thanks!'; 
+                }
+            }
+            echo json_encode($return);
+            exit();
         }
     }
     TvadiChatProcessHandler::init();

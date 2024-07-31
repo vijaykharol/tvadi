@@ -316,3 +316,41 @@ Stack trace:
 #2 /home/hipldemo1/tvadi.hipl-staging1.com/index.php(17): require('/home/hipldemo1...')
 #3 {main}
   thrown in /home/hipldemo1/tvadi.hipl-staging1.com/wp-content/themes/tvadimarket/templates/chat-page.php on line 136
+[31-Jul-2024 09:19:59 UTC] PHP Warning:  require_once(./pusher/vendor/autoload.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\tvadi\wp-content\themes\tvadimarket\inc\classes\class.chat-process-handler.php on line 11
+[31-Jul-2024 09:19:59 UTC] PHP Fatal error:  Uncaught Error: Failed opening required './pusher/vendor/autoload.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\tvadi\wp-content\themes\tvadimarket\inc\classes\class.chat-process-handler.php:11
+Stack trace:
+#0 C:\xampp\htdocs\tvadi\wp-content\themes\tvadimarket\inc\classes\class.chat-process-handler.php(286): TvadiChatProcessHandler::init()
+#1 C:\xampp\htdocs\tvadi\wp-content\themes\tvadimarket\functions.php(183): require('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\tvadi\wp-settings.php(668): include('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\tvadi\wp-config.php(105): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\tvadi\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#5 C:\xampp\htdocs\tvadi\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#6 C:\xampp\htdocs\tvadi\index.php(17): require('C:\\xampp\\htdocs...')
+#7 {main}
+  thrown in C:\xampp\htdocs\tvadi\wp-content\themes\tvadimarket\inc\classes\class.chat-process-handler.php on line 11
+[31-Jul-2024 09:20:10 UTC] PHP Warning:  require_once(../pusher/vendor/autoload.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\tvadi\wp-content\themes\tvadimarket\inc\classes\class.chat-process-handler.php on line 11
+[31-Jul-2024 09:20:10 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '../pusher/vendor/autoload.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\tvadi\wp-content\themes\tvadimarket\inc\classes\class.chat-process-handler.php:11
+Stack trace:
+#0 C:\xampp\htdocs\tvadi\wp-content\themes\tvadimarket\inc\classes\class.chat-process-handler.php(286): TvadiChatProcessHandler::init()
+#1 C:\xampp\htdocs\tvadi\wp-content\themes\tvadimarket\functions.php(183): require('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\tvadi\wp-settings.php(668): include('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\tvadi\wp-config.php(105): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\tvadi\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#5 C:\xampp\htdocs\tvadi\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#6 C:\xampp\htdocs\tvadi\index.php(17): require('C:\\xampp\\htdocs...')
+#7 {main}
+  thrown in C:\xampp\htdocs\tvadi\wp-content\themes\tvadimarket\inc\classes\class.chat-process-handler.php on line 11
+[31-Jul-2024 10:37:10 UTC] PHP Fatal error:  Uncaught TypeError: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class TvadiChatProcessHandler does not have a method "update_chat_screen_cb" in C:\xampp\htdocs\tvadi\wp-includes\class-wp-hook.php:324
+Stack trace:
+#0 C:\xampp\htdocs\tvadi\wp-includes\class-wp-hook.php(348): WP_Hook->apply_filters('', Array)
+#1 C:\xampp\htdocs\tvadi\wp-includes\plugin.php(517): WP_Hook->do_action(Array)
+#2 C:\xampp\htdocs\tvadi\wp-admin\admin-ajax.php(192): do_action('wp_ajax_update_...')
+#3 {main}
+  thrown in C:\xampp\htdocs\tvadi\wp-includes\class-wp-hook.php on line 324
+[31-Jul-2024 10:37:10 UTC] PHP Fatal error:  Uncaught TypeError: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class TvadiChatProcessHandler does not have a method "update_chat_screen_cb" in C:\xampp\htdocs\tvadi\wp-includes\class-wp-hook.php:324
+Stack trace:
+#0 C:\xampp\htdocs\tvadi\wp-includes\class-wp-hook.php(348): WP_Hook->apply_filters('', Array)
+#1 C:\xampp\htdocs\tvadi\wp-includes\plugin.php(517): WP_Hook->do_action(Array)
+#2 C:\xampp\htdocs\tvadi\wp-admin\admin-ajax.php(192): do_action('wp_ajax_update_...')
+#3 {main}
+  thrown in C:\xampp\htdocs\tvadi\wp-includes\class-wp-hook.php on line 324

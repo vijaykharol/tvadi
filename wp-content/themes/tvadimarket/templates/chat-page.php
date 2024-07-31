@@ -93,7 +93,7 @@ function get_username_by_id($id){
                         </ul>
                     </div>
                 </div>
-                <div class="content" id="tvadi-user-messages-section">
+                <div class="content" id="tvadi-user-messages-section" data-parent="<?= $parent_chat_id ?>">
 					<?php
 					if(!empty($parent_chat_id)){
 						$chatUser =  $wpdb->get_row("SELECT * FROM `".$wpdb->prefix."chat_main_tbl` WHERE id='$parent_chat_id' LIMIT 1");
@@ -199,6 +199,7 @@ function get_username_by_id($id){
 get_footer();
 ?>
 <script src="<?= get_template_directory_uri() ?>/emojionearea-master/dist/emojionearea.js"></script>
+<script src="https://js.pusher.com/8.0.1/pusher.min.js"></script>
 <script>
 	jQuery(document).ready(function(){
 		trigger_emojis();
@@ -214,8 +215,39 @@ get_footer();
 				}
 			});
 		}
-     	// jQuery(document).on('click', '.emojionearea-editor', function(){
-		// 	jQuery('.emojionearea-button-close').click();
-		// });
+	});
+
+	//Pusher
+	jQuery(document).ready(function(){
+		var pusher = new Pusher('46a9b86b75fe0364ed37', {
+			cluster: 'ap2'
+		});
+
+  		var channel = pusher.subscribe('aware-gift-30');
+  		channel.bind('chatbot-new-message', function(data){
+			var chat_parent_id = data.parent_id;
+			jQuery.ajax({
+				type 		:  'POST',
+				url 		:  '<?= admin_url('admin-ajax.php'); ?>',
+				data 		:  {
+					action  			:   'update_chat_screen',
+					parent_id 			: 	data.parent_id,
+				},
+				success: function(response){
+					const resss = JSON.parse(response);
+					if(resss.status){
+						if(resss.html != ''){
+							jQuery('.content[data-parent="'+chat_parent_id+'"]').html('');
+							jQuery('.content[data-parent="'+chat_parent_id+'"]').html(resss.html);
+							emojiTrigger();
+							scrollToBottom();
+						}
+					}else{
+						console.log(resss.message);
+						location.reload();
+					}
+				}	
+			});
+  		});
 	});
 </script>
