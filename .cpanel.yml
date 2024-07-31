@@ -1,0 +1,3 @@
+deployment:
+  tasks:
+    - /bin/cp -a /home/hipldemo1/tvadi.hipl-staging1.com/* /home/hipldemo1/tvadi.hipl-staging1.com/
