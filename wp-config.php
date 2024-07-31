@@ -67,7 +67,7 @@ define('NONCE_SALT', 'B69b@@*32u;1v0DRlNXZ3G%@gp#8+Z0r58Dl7Y#/5frx579-tjGklidT_U
  * You can have multiple installations in one database if you give each
  * a unique prefix. Only numbers, letters, and underscores please!
  */
-$table_prefix = 'tJe3Quj_';
+$table_prefix = 'tJe3Quj_'; 
 
 
 /* Add any custom values between this line and the "stop editing" line. */
