@@ -16,7 +16,6 @@ get_header();
 <link rel="stylesheet" href="<?= get_template_directory_uri() ?>/emojionearea-master/dist/emojionearea.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 <?php 
-echo 'deepak sir123';
 global $wpdb;
 $user 				= 	wp_get_current_user();
 $c_user_id 			= 	$user->ID;
