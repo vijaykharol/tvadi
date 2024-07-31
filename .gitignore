@@ -1,2 +1,6 @@
 #Ignore Config File
-wp-config.*
+wp-config.php
+
+#ignore upload and cache
+wp-content/uploads/
+wp-content/cache/
