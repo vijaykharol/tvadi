@@ -390,7 +390,7 @@
 							width: 100%;
 						}
 						
-						span {
+						span.offline {
 							position: absolute;
 							left: 0;
 							margin: -2px 0 0 -2px;
@@ -399,18 +399,16 @@
 							border-radius: 50%;
 							border: 2px solid $dark;
 							background: #ffbc00;
-
-							&.online {
-								background: #2ecc71;
-							}
-							
-							&.away {
-								background: $yellow;
-							}
-							
-							&.busy {
-								background: red;
-							}
+						}
+						span.online {
+							position: absolute;
+							left: 0;
+							margin: -2px 0 0 -2px;
+							width: 10px;
+							height: 10px;
+							border-radius: 50%;
+							border: 2px solid $dark;
+							background: green;
 						}
 
 						img {
@@ -749,4 +747,21 @@ div#contacts {
 }
 span.msginfo {
     color: #000000a8;
+}
+li.contact {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+span.unseen-new {
+    background: #6d4eec;
+    padding: 10px 20px 10px 20px;
+    border-radius: 50%;
+    color: #fff;
+    font-weight: 600;
+}
+.lastmessage {
+    width: 100%;
+    text-align: right;
+    padding-right: 10px;
 }

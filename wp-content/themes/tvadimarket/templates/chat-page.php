@@ -68,10 +68,13 @@ function get_username_by_id($id){
 									$lastname 			 =   get_user_meta($uid, 'last_name', true)  ? get_user_meta($uid, 'last_name', true) : '';
 									$uprofile_info       =   get_user_meta($uid, 'user_profile_info', true);
 									$listuserinfo	     =   get_userdata($uid);
+									$unseenMessages		 =	 $wpdb->get_row("SELECT COUNT(id) as total FROM `".$wpdb->prefix."chats_tbl` WHERE status='0' AND sender='$uid' AND receiver='$c_user_id'");
+									$lasmessage		 	 =	 $wpdb->get_row("SELECT * FROM `".$wpdb->prefix."chats_tbl` WHERE (sender='$uid' AND receiver='$c_user_id') OR sender='$c_user_id' AND receiver='$uid' ORDER BY id DESC LIMIT 1");
+									$totalunseencounter  =	 $unseenMessages->total;
 									$userDisplayname	 =   (!empty($firstname) || !empty($lastname)) ? $firstname.' '.$lastname : $listuserinfo->display_name;
 									?>
-									<li class="contact active <?php if($parent_chat_id == $u->id) echo 'active-list'; ?>" onclick="showUserChat(<?= $u->id ?>, <?= $c_user_id ?>, this)">
-										<div class="wrap">
+									<li class="contact active <?php if($parent_chat_id == $u->id) echo 'active-list'; ?>" data-userparent="<?= $parent_chat_id ?>" onclick="showUserChat(<?= $u->id ?>, <?= $c_user_id ?>, this)">
+										<div class="wrap" id="info-list-u">
 											<?php 
 											if(is_user_online($uid)){
 												$ustatus = 'online';
@@ -83,7 +86,18 @@ function get_username_by_id($id){
 											<img src="<?= $uprofile_picture ?>" alt=""/>
 											<div class="meta">
 												<p class="name"><?= $userDisplayname ?></p>
+												<?php 
+												if(!empty($totalunseencounter)){
+													?>
+													<span class="unseen-new"><?= number_format($totalunseencounter) ?></span>
+													<?php
+												}
+												?>
 											</div>
+										</div>
+										<div class="lastmessage">
+											<span class="l-message"><?= $lasmessage->message ?></span>
+											<span class="l-datetime"><?= $lasmessage->sent_datetime ?></span>
 										</div>
 									</li>
 									<?php
@@ -98,6 +112,20 @@ function get_username_by_id($id){
 					if(!empty($parent_chat_id)){
 						$chatUser =  $wpdb->get_row("SELECT * FROM `".$wpdb->prefix."chat_main_tbl` WHERE id='$parent_chat_id' LIMIT 1");
 						if(!empty($chatUser)){
+
+							//seen message process if parent is trigger trough url 
+							$updateData = [
+								'status' => '1',
+							];
+		
+							$whereee = [
+								'receiver'  => $c_user_id,
+								'parent_id' => $parent_chat_id,
+							];
+		
+							$chattable  =   $wpdb->prefix.'chats_tbl';
+							$seen       =   $wpdb->update($chattable, $updateData, $whereee); //seen...
+
 							if(!empty($chatUser->contact_user_1) && $c_user_id != $chatUser->contact_user_1){
 								$chatuser_id = $chatUser->contact_user_1;
 							}else{
@@ -239,6 +267,9 @@ get_footer();
 						if(resss.html != ''){
 							jQuery('.content[data-parent="'+chat_parent_id+'"]').html('');
 							jQuery('.content[data-parent="'+chat_parent_id+'"]').html(resss.html);
+							if(jQuery('.content[data-parent="'+chat_parent_id+'"]').length > 0){
+								jQuery('.active-list').click();
+							}
 							emojiTrigger();
 							scrollToBottom();
 						}

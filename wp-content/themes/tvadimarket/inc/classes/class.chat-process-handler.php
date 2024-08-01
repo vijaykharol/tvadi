@@ -181,6 +181,19 @@ if(!class_exists('TvadiChatProcessHandler', false)){
                 $chatUser   =  $wpdb->get_row("SELECT * FROM `".$wpdb->prefix."chat_main_tbl` WHERE id='$parent_id' LIMIT 1");
                 $html       = '';
                 if(!empty($chatUser)){
+
+                    $updateData = [
+                        'status' => '1',
+                    ];
+
+                    $whereee = [
+                        'receiver'  => $c_user_id,
+                        'parent_id' => $parent_id,
+                    ];
+
+                    $chattable  =   $wpdb->prefix.'chats_tbl';
+                    $seen       =   $wpdb->update($chattable, $updateData, $whereee);
+
                     if(!empty($chatUser->contact_user_1) && $c_user_id != $chatUser->contact_user_1){
                         $chatuser_id = $chatUser->contact_user_1;
                     }else{
@@ -304,7 +317,7 @@ if(!class_exists('TvadiChatProcessHandler', false)){
                 $return['message']  =   'Something went wrong please try again. Thanks!';
             }else{
                 $chatUser   =  $wpdb->get_row("SELECT * FROM `".$wpdb->prefix."chat_main_tbl` WHERE id='$parent_id' LIMIT 1");
-                $html       = '';
+                $html       =  '';
                 if(!empty($chatUser)){
                     if(!empty($chatUser->contact_user_1) && $c_user_id != $chatUser->contact_user_1){
                         $chatuser_id = $chatUser->contact_user_1;
