@@ -706,6 +706,7 @@ function advSearch(){
 //Add Contact
 function addContact(post_author_id, current_user_id, post_id, btn){
   if(post_author_id != '' || current_user_id != '' || post_id != ''){
+    jQuery(btn).html('Please wait...');
     jQuery.ajax({
       url             :   ajax_object.ajax_url,
       type            :   'POST',
@@ -725,9 +726,11 @@ function addContact(post_author_id, current_user_id, post_id, btn){
             alert(ress.message);
             location.reload();
           }
+          jQuery(btn).html('Contact <img src="/wp-content/themes/tvadimarket/images/arrow.svg" class="img-fluid" alt="">');
       },
       error: function(reserr){
         console.log(reserr);
+        jQuery(btn).html('Contact <img src="/wp-content/themes/tvadimarket/images/arrow.svg" class="img-fluid" alt="">');
       }
     });
   }

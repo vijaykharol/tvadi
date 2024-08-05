@@ -354,3 +354,15 @@ Stack trace:
 #2 C:\xampp\htdocs\tvadi\wp-admin\admin-ajax.php(192): do_action('wp_ajax_update_...')
 #3 {main}
   thrown in C:\xampp\htdocs\tvadi\wp-includes\class-wp-hook.php on line 324
+[05-Aug-2024 06:22:31 UTC] PHP Warning:  Attempt to read property "sent_datetime" on null in C:\xampp\htdocs\tvadi\wp-content\themes\tvadimarket\templates\chat-page.php on line 94
+[05-Aug-2024 06:22:31 UTC] PHP Deprecated:  strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated in C:\xampp\htdocs\tvadi\wp-content\themes\tvadimarket\templates\chat-page.php on line 94
+[05-Aug-2024 06:22:31 UTC] PHP Warning:  Attempt to read property "sent_datetime" on null in C:\xampp\htdocs\tvadi\wp-content\themes\tvadimarket\templates\chat-page.php on line 101
+[05-Aug-2024 06:22:31 UTC] PHP Deprecated:  strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated in C:\xampp\htdocs\tvadi\wp-content\themes\tvadimarket\templates\chat-page.php on line 101
+[05-Aug-2024 06:22:31 UTC] PHP Warning:  Attempt to read property "message" on null in C:\xampp\htdocs\tvadi\wp-content\themes\tvadimarket\templates\chat-page.php on line 107
+[05-Aug-2024 06:22:31 UTC] PHP Deprecated:  stripslashes(): Passing null to parameter #1 ($string) of type string is deprecated in C:\xampp\htdocs\tvadi\wp-content\themes\tvadimarket\templates\chat-page.php on line 107
+[05-Aug-2024 06:23:40 UTC] PHP Warning:  Attempt to read property "sent_datetime" on null in C:\xampp\htdocs\tvadi\wp-content\themes\tvadimarket\templates\chat-page.php on line 94
+[05-Aug-2024 06:23:40 UTC] PHP Deprecated:  strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated in C:\xampp\htdocs\tvadi\wp-content\themes\tvadimarket\templates\chat-page.php on line 94
+[05-Aug-2024 06:23:40 UTC] PHP Warning:  Attempt to read property "sent_datetime" on null in C:\xampp\htdocs\tvadi\wp-content\themes\tvadimarket\templates\chat-page.php on line 101
+[05-Aug-2024 06:23:40 UTC] PHP Deprecated:  strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated in C:\xampp\htdocs\tvadi\wp-content\themes\tvadimarket\templates\chat-page.php on line 101
+[05-Aug-2024 06:23:40 UTC] PHP Warning:  Attempt to read property "message" on null in C:\xampp\htdocs\tvadi\wp-content\themes\tvadimarket\templates\chat-page.php on line 107
+[05-Aug-2024 06:23:40 UTC] PHP Deprecated:  stripslashes(): Passing null to parameter #1 ($string) of type string is deprecated in C:\xampp\htdocs\tvadi\wp-content\themes\tvadimarket\templates\chat-page.php on line 107

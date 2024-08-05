@@ -60,11 +60,10 @@ if(have_posts()) :
             $post_auction_length                    =   get_post_meta( $postid, 'post_auction_length', true );
             $post_reserve_amount                    =   get_post_meta( $postid, 'post_reserve_amount', true );
             $price_from                             =   (int)get_post_meta( $postid, 'price_from', true );
-            
             //Add commisions and taxes
-            $commission                             =   (!empty($commission_rate)) ? ($price_from * $commission_rate/100) : 0;
-            $taxes                                  =   (!empty($tax_rate)) ? ($price_from * $tax_rate/100) : 0;
-            $calculatedPrice                        =   $price_from + $commission + $taxes;
+            $commission         =   (!empty($commission_rate)) ? ($price_from * $commission_rate/100) : 0;
+            $taxes              =   (!empty($tax_rate)) ? ($price_from * $tax_rate/100) : 0;
+            $calculatedPrice    =   $price_from + $commission + $taxes;
 
             $post_hourly_onetime                    =   get_post_meta( $postid, 'post_hourly_onetime', true );
             $post_currency                          =   get_post_meta( $postid, 'post_currency', true );
@@ -87,13 +86,13 @@ if(have_posts()) :
             //generate Qr code
             $QRdata                                 =   (!empty($post_qr_code)) ? $post_qr_code : get_the_title();
             ?>
-            <!-- OUTLET LISITNG START -->
+            <!-- MAKER LISITNG START -->
             <section class="listing-details pb-0">
                 <div class="container-fluid">
                     <div class="data-wrapper">
                         <div class="data-wrapper-left">
                             <div class="data-wrapper-left-inner">
-                                <div class="image"><img src="<?= $postimageurl ?>" class="img-fluid" alt="" /></div>
+                                <div class="image"><img src="<?= $postimageurl ?>" class="img-fluid" alt="<?= get_the_title() ?>" /></div>
                                 <div class="content">
                                     <div class="content-inner">
                                         <h2 class="title"><?= get_the_title() ?></h2>
@@ -144,25 +143,36 @@ if(have_posts()) :
                             </div>
                         </div>
                         <div class="data-wrapper-right">
-                            <form>
+                            <form action="/checkout/" method="POST" class="checkout-form">
                                 <div class="price">From $<?= number_format($calculatedPrice, 2, '.', ','); ?></div>
                                 <div class="form-group">
                                     <label>Type:</label>
-                                    <select class="form-control rounded-type">
-                                        <option>Project</option>
-                                        <option>Hourly</option>
+                                    <select class="form-control rounded-type" name="type">
+                                        <option value="Project">Project</option>
+                                        <option value="Hourly">Hourly</option>
                                     </select>
+                                    <input type="hidden" name="total_amount" value="<?= $calculatedPrice ?>">
+                                    <input type="hidden" name="seller_amount" value="<?= $price_from ?>">
+                                    <input type="hidden" name="product_id" value="<?= $postid ?>">
+                                    <input type="hidden" name="post_author" value="<?= $post_author_id ?>">
                                 </div>
-                                <!-- <div class="form-group">
-                                    <label>Method:</label>
-                                    <select class="form-control rounded-type">
-                                        <option>Project</option>
-                                        <option>Hourly</option>
-                                    </select>
-                                </div> -->
                                 <p>Disclaimer:  All buys are subject to sellers approval and verification.  Please check with the seller to verify cost and work time-frame.  </p>
-                                <div class="contact-btn"><a href="#" class="btn btn-secondary btn-large">Contact <img src="<?= get_stylesheet_directory_uri() ?>/images/arrow.svg" class="img-fluid" alt="" /></a></div>
-                                <div class="order-btn"><a href="#" class="btn btn-primary btn-large">Order <img src="<?= get_stylesheet_directory_uri() ?>/images/arrow.svg" class="img-fluid" alt="" /></a></div>
+                                <div class="contact-btn">
+                                    <?php 
+                                    if(is_user_logged_in() && $post_author_id != $current_user_id){
+                                        ?>
+                                        <a href="javascript:;" class="btn btn-secondary btn-large" onClick="addContact(<?= $post_author_id ?>, <?= $current_user_id ?>, <?= $postid ?>, this);">Contact <img src="<?= get_stylesheet_directory_uri() ?>/images/arrow.svg" class="img-fluid" alt="" /></a>
+                                        <?php
+                                    }else if(!is_user_logged_in()){
+                                        ?>
+                                        <a href="/login/" class="btn btn-secondary btn-large">Contact <img src="<?= get_stylesheet_directory_uri() ?>/images/arrow.svg" class="img-fluid" alt="" /></a>
+                                        <?php
+                                    }
+                                    ?>
+                                </div>
+                                <div class="order-btn">
+                                    <button class="btn btn-primary btn-large">Order <img src="<?= get_stylesheet_directory_uri() ?>/images/arrow.svg" class="img-fluid" alt="" /></button>
+                                </div>
                                 <div class="form-list">
                                     <?php 
                                     if(is_user_logged_in()){
@@ -215,7 +225,19 @@ if(have_posts()) :
                                             <span class="rating">5 <img src="<?= get_stylesheet_directory_uri() ?>/images/star.svg" class="img-fluid" alt="" /></span>
                                             <span class="comments">(288)</span>
                                         </div>
-                                        <div class="contact-btn mb-0"><a href="#" class="btn btn-secondary btn-large">Contact </a></div>
+                                        <div class="contact-btn mb-0">
+                                            <?php 
+                                            if(is_user_logged_in() && $post_author_id != $current_user_id){
+                                                ?>
+                                                <a href="javascript:;" class="btn btn-secondary btn-large" onClick="addContact(<?= $post_author_id ?>, <?= $current_user_id ?>, <?= $postid ?>, this);">Contact <img src="<?= get_stylesheet_directory_uri() ?>/images/arrow.svg" class="img-fluid" alt="" /></a>
+                                                <?php
+                                            }else if(!is_user_logged_in()){
+                                                ?>
+                                                <a href="/login/" class="btn btn-secondary btn-large">Contact <img src="<?= get_stylesheet_directory_uri() ?>/images/arrow.svg" class="img-fluid" alt="" /></a>
+                                                <?php
+                                            }
+                                            ?>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -238,22 +260,22 @@ if(have_posts()) :
                     </div>
                 </div>
             </section>
-            <!-- OUTLET LISITNG END -->
+            <!-- MAKER LISITNG END -->
 
-            <!-- SIMILAR LISTING START -->
-            <section class="similar-listing bg-dark">
+            <!-- PORTFOLIO START -->
+            <section class="portfolio bg-dark">
                 <div class="container-fluid">
                     <div class="global-heading">
                         <div class="row">
                             <div class="col-12 col-lg-12">
-                                <h2 class="title heading-gap">Similar  Listings:</h2>
+                                <h2 class="title heading-gap">Portfolio:</h2>
                             </div>
                         </div>
                     </div>
-                    <div class="similar-listing-wrapper">
+                    <div class="portfolio-wrapper">
                         <div class="post-gap d-grid grid-3">
                             <?php 
-                             $arguements1 = [
+                            $arguements1 = [
                                 'post_type'         =>  'outlet_listing',
                                 'post_status'       =>  'publish',
                                 'posts_per_page'    =>  3,
@@ -277,23 +299,23 @@ if(have_posts()) :
                             }
                             ?>
                         </div>
-                        <div class="more mt-3 text-end"><a href="/outlet/" class="btn btn-secondary btn-small">Discover All</a></div>
+                        <div class="more mt-3 text-end"><a href="/makers/" class="btn btn-secondary btn-small">Discover All</a></div>
                     </div>
                 </div>
             </section>
-            <!-- SIMILAR LISTING END -->
+            <!-- PORTFOLIO END -->
 
-            <!-- OUTLET AUCTION START -->
-            <section class="outlet-auction">
+            <!-- SIMILAR LISTING START -->
+            <section class="similar-listing">
                 <div class="container-fluid">
                     <div class="global-heading">
                         <div class="row">
                             <div class="col-12 col-lg-12">
-                                <h2 class="title heading-gap">Outlet Auctions:</h2>
+                                <h2 class="title heading-gap">Similar  Listings:</h2>
                             </div>
                         </div>
                     </div>
-                    <div class="outlet-auction-wrapper">
+                    <div class="similar-listing-wrapper">
                         <div class="post-gap d-grid grid-3">
                             <?php 
                             $arguements2 = [
@@ -319,11 +341,11 @@ if(have_posts()) :
                             }
                             ?>
                         </div>
-                        <div class="more mt-3 text-end"><a href="/outlet/" class="btn btn-secondary btn-small">Discover All</a></div>
+                        <div class="more mt-3 text-end"><a href="#" class="btn btn-secondary btn-small">Discover All</a></div>
                     </div>
                 </div>
             </section>
-            <!-- OUTLET AUCTION END -->
+            <!-- SIMILAR LISTING END -->
 
             <!-- VIEWING HISTORY START -->
             <section class="viewing-history bg-dark">
@@ -335,7 +357,7 @@ if(have_posts()) :
                             </div>
                         </div>
                     </div>
-                    <div class="more-listing-wrapper">
+                    <div class="viewing-listing-wrapper">
                         <div class="post-gap d-grid grid-3">
                             <?php 
                             $arguements3 = [
@@ -361,7 +383,7 @@ if(have_posts()) :
                             }
                             ?>
                         </div>
-                        <div class="more mt-3 text-end"><a href="/outlet/" class="btn btn-secondary btn-small">Discover All</a></div>
+                        <div class="more mt-3 text-end"><a href="/maker/" class="btn btn-secondary btn-small">Discover All</a></div>
                     </div>
                 </div>
             </section>

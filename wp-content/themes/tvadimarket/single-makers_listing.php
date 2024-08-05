@@ -159,11 +159,11 @@ if(have_posts()) :
                                 <p>Disclaimer:  All buys are subject to sellers approval and verification.  Please check with the seller to verify cost and work time-frame.  </p>
                                 <div class="contact-btn">
                                     <?php 
-                                    if(is_user_logged_in()){
+                                    if(is_user_logged_in() && $post_author_id != $current_user_id){
                                         ?>
                                         <a href="javascript:;" class="btn btn-secondary btn-large" onClick="addContact(<?= $post_author_id ?>, <?= $current_user_id ?>, <?= $postid ?>, this);">Contact <img src="<?= get_stylesheet_directory_uri() ?>/images/arrow.svg" class="img-fluid" alt="" /></a>
                                         <?php
-                                    }else{
+                                    }else if(!is_user_logged_in()){
                                         ?>
                                         <a href="/login/" class="btn btn-secondary btn-large">Contact <img src="<?= get_stylesheet_directory_uri() ?>/images/arrow.svg" class="img-fluid" alt="" /></a>
                                         <?php
@@ -225,7 +225,19 @@ if(have_posts()) :
                                             <span class="rating">5 <img src="<?= get_stylesheet_directory_uri() ?>/images/star.svg" class="img-fluid" alt="" /></span>
                                             <span class="comments">(288)</span>
                                         </div>
-                                        <div class="contact-btn mb-0"><a href="#" class="btn btn-secondary btn-large">Contact </a></div>
+                                        <div class="contact-btn mb-0">
+                                            <?php 
+                                            if(is_user_logged_in() && $post_author_id != $current_user_id){
+                                                ?>
+                                                <a href="javascript:;" class="btn btn-secondary btn-large" onClick="addContact(<?= $post_author_id ?>, <?= $current_user_id ?>, <?= $postid ?>, this);">Contact <img src="<?= get_stylesheet_directory_uri() ?>/images/arrow.svg" class="img-fluid" alt="" /></a>
+                                                <?php
+                                            }else if(!is_user_logged_in()){
+                                                ?>
+                                                <a href="/login/" class="btn btn-secondary btn-large">Contact <img src="<?= get_stylesheet_directory_uri() ?>/images/arrow.svg" class="img-fluid" alt="" /></a>
+                                                <?php
+                                            }
+                                            ?>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

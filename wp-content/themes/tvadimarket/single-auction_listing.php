@@ -1,4 +1,12 @@
 <?php
+/**
+ * The template for displaying all single posts
+ *
+ * @link https://developer.wordpress.org/themes/basics/template-hierarchy/#single-post
+ *
+ * @package tvadimarket
+*/
+
 get_header();
 $stylesheet_directory = get_stylesheet_directory();
 require_once get_stylesheet_directory() . '/php-qrcode/vendor/autoload.php';
@@ -29,6 +37,12 @@ function generate_qr_code($data){
     echo $imageString;
 }
 
+$stripe_settings     =  get_option('stripe_settings');
+$commission_settings =  get_option('commission_settings');
+
+$commission_rate     =  (!empty($commission_settings) && is_array($commission_settings)) ? (int) $commission_settings['commission_rate']    :   0;
+$tax_rate            =  (!empty($commission_settings) && is_array($commission_settings)) ? (int) $commission_settings['tax_rate']           :   0;
+
 if(have_posts()) :
     while(have_posts()) : the_post(); 
         ?>
@@ -37,6 +51,7 @@ if(have_posts()) :
             <?php 
             $postid                                 =   get_the_ID();
             $post_author_id                         =   get_post_field( 'post_author', $postid );
+            $author_data                            =   get_userdata($post_author_id);
             $current_user_id                        =   get_current_user_id();
             $post_keywords                          =   get_post_meta( $postid, 'post_keywords', true );
             $post_plateform                         =   get_post_meta( $postid, 'post_plateform', true );
@@ -44,7 +59,12 @@ if(have_posts()) :
             $post_auction_listing                   =   get_post_meta( $postid, 'post_auction_listing', true );
             $post_auction_length                    =   get_post_meta( $postid, 'post_auction_length', true );
             $post_reserve_amount                    =   get_post_meta( $postid, 'post_reserve_amount', true );
-            $price_from                             =   get_post_meta( $postid, 'price_from', true );
+            $price_from                             =   (int)get_post_meta( $postid, 'price_from', true );
+            //Add commisions and taxes
+            $commission         =   (!empty($commission_rate)) ? ($price_from * $commission_rate/100) : 0;
+            $taxes              =   (!empty($tax_rate)) ? ($price_from * $tax_rate/100) : 0;
+            $calculatedPrice    =   $price_from + $commission + $taxes;
+
             $post_hourly_onetime                    =   get_post_meta( $postid, 'post_hourly_onetime', true );
             $post_currency                          =   get_post_meta( $postid, 'post_currency', true );
             $post_sku                               =   get_post_meta( $postid, 'post_sku', true );
@@ -55,6 +75,9 @@ if(have_posts()) :
             $post_location                          =   get_post_meta( $postid, 'post_location', true );
             $post_final_product_proof_of_service    =   get_post_meta( $postid, 'post_final_product_proof_of_service', true );
             $post_playlist_id                       =   get_post_meta( $postid, 'post_playlist_id', true );
+            $total_ratings                          =   get_post_meta( $postid, 'total_ratings', true );
+            $average_rating                         =   get_post_meta( $postid, 'average_rating', true );
+            $subtitle                               =   get_post_meta( $postid, 'subtitle', true );
             $timelinenum                            =   (!empty($post_timeline)) ? (int) $post_timeline : 0;
             $duestring                              =   '+'.$timelinenum.' days';
             $duedate                                =   date('d/m/Y', strtotime((string)$duestring));
@@ -63,151 +86,308 @@ if(have_posts()) :
             //generate Qr code
             $QRdata                                 =   (!empty($post_qr_code)) ? $post_qr_code : get_the_title();
             ?>
-            <section class="make-listing ld-block">
+            <!-- MAKER LISITNG START -->
+            <section class="listing-details pb-0">
                 <div class="container-fluid">
-                    <div class="listing-form">
-                        <ul class="form-steps mb-40">
-                            <li><img src="<?= get_stylesheet_directory_uri() ?>/images/arrow-right-2.png" class="img-fluid" /> Updates</li>
-                            <li class="active"><img src="<?= get_stylesheet_directory_uri() ?>/images/arrow-right-2.png" class="img-fluid" /> Details & Requirements</li>
-                            <li><img src="<?= get_stylesheet_directory_uri() ?>/images/arrow-right-2.png" class="img-fluid" /> Fulfillment</li>
-                        </ul>
-                    </div>
-                    <div class="side-by-side-data">
-                        <div class="left">
-                            <div class="semi-columns-content-block">
-                                <h4 class="title">Description</h4>
-                                <div class="content-inner">
-                                    <div class="description">
-                                        <?= the_content(); ?>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="semi-columns-content-block">
-                                <h4 class="title">Keywords</h4>
-                                <div class="content-inner"><?= $post_keywords ?></div>
-                            </div>
-                            <div class="semi-columns-content-block">
-                                <h4 class="title">Media / Market / Category</h4>
-                                <div class="content-inner"><?= $post_plateform ?></div>
-                            </div>
-                            <div class="semi-columns-content-block">
-                                <h4 class="title">Time-line</h4>
-                                <div class="content-inner"><?= $post_timeline ?></div>
-                            </div>
-                            <?php 
-                            if(!empty($price_from)){
-                                ?>
-                                <div class="semi-columns-content-block">
-                                    <h4 class="title">Budget</h4>
-                                    <div class="content-inner">$<?= $price_from ?></div>
-                                </div>
-                                <?php
-                            }
-                            ?>
-                            <div class="semi-columns-content-block">
-                                <h4 class="title">Reference Number</h4>
-                                <div class="content-inner"><?= $post_phone ?></div>
-                            </div>
-                            <div class="semi-columns-content-block">
-                                <h4 class="title">Phone</h4>
-                                <div class="content-inner"><a href="<?= $post_phone ?>"><?= $post_phone ?></a></div>
-                            </div>
-                            <div class="semi-columns-content-block">
-                                <h4 class="title">QR Code</h4>
-                                <div class="content-inner"><a href=""><?= $post_qr_code ?></a></div>
-                            </div>
-                            <div class="semi-columns-content-block">
-                                <h4 class="title">URL</h4>
-                                <div class="content-inner"><a href=""><?= $post_url ?></a></div>
-                            </div>
-                            <div class="semi-columns-content-block">
-                                <h4 class="title">Additional Media</h4>
-                                <div class="content-inner"><a href=""><?= $post_additional_listing_media ?></a></div>
-                            </div>
-                            <div class="semi-columns-content-block">
-                                <h4 class="title">Additional Notes</h4>
-                                <div class="content-inner"><?= $post_final_product_proof_of_service ?></div>
-                            </div>
-                            <?php 
-                            if($current_user_id == $post_author_id){
-                                ?>
-                                <div class="text-end"><a href="/make-listing/?id=<?= $postid ?>" class="btn btn-primary btn-large">Update <img src="<?= get_stylesheet_directory_uri() ?>/images/arrow.svg" class="img-fluid" alt=""></a></div>
-                                <?php
-                            }
-                            ?>
-                        </div>
-                        <div class="right basic">
-                            <div class="block-inner">
-                                <h3>Basics</h3>
-                                <div class="discounted">
-                                    <h4><?= get_the_title() ?></h4>
-                                    <div class="basic-img"><img src="<?= $postimageurl ?>" class="img-fluid" alt="<?= get_the_title() ?>" /></div>
-                                    <?php 
-                                    // Retrieve the post content
-                                    $content            =   get_the_content();
-                                    // Strip shortcodes and tags (optional, based on your needs)
-                                    $content            =   strip_shortcodes($content);
-                                    $content            =   wp_strip_all_tags($content);
-                                    // Split the content into an array of words
-                                    $words              =   explode(' ', $content);
-                                    // Take the first 6 words
-                                    $first_six_words    =   array_slice($words, 0, 5);
-                                    // Convert the array of words back to a string
-                                    $excerpt            =   implode(' ', $first_six_words);
-                                    // Append '..' to the excerpt
-                                    $excerpt            .=  '..';
-                                    ?>
-                                    <p><?= $excerpt ?></p>
-                                    <ul>
-                                        <li class="order-with">Order With:  Venture Ad Agency </li>
-                                        <li class="due-date">Due Date: <?= $duedate ?> </li>
-                                        <li class="cost">Cost:  $<?= $price_from ?> </li>
-                                        <li class="refrence-number">Reference Number:  <?= $post_phone ?></li>
-                                        <li class="qr-code mb-0 p-0"><span>Listing QR Code:</span>
-                                            <div class="qr-code-block">
-                                                <img src="<?= generate_qr_code($QRdata); ?>" class="img-fluid" alt="" />
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <?php 
-                            if($current_user_id == $post_author_id){
-                                ?>
-                                <div class="text-end"><a href="/make-listing/?id=<?= $postid ?>" class="btn btn-primary btn-large">Update <img src="<?= get_stylesheet_directory_uri() ?>/images/arrow.svg" class="img-fluid" alt="" /></a></div>
-                                <?php
-                            }
-                            ?>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            <!-- LISTING DETAILS END -->
-
-            <!-- FORM MAIN START -->
-            <section class="contact-buyer">
-                <div class="container-fluid">
-                    <div class="side-by-side-data">
-                        <div class="left">
-                            <form>
-                                <div class="form-main">
-                                    <div class="row align-items-center">
-                                        <div class="col-12 col-lg-12">
-                                            <div class="form-group">
-                                                <label>Contact Buyer:</label>
-                                                <div class="field-gap">
-                                                    <textarea class="form-control" placeholder="Add message within this oder"></textarea>
-                                                </div>
-                                            </div>
+                    <div class="data-wrapper">
+                        <div class="data-wrapper-left">
+                            <div class="data-wrapper-left-inner">
+                                <div class="image"><img src="<?= $postimageurl ?>" class="img-fluid" alt="<?= get_the_title() ?>" /></div>
+                                <div class="content">
+                                    <div class="content-inner">
+                                        <h2 class="title"><?= get_the_title() ?></h2>
+                                        <?php
+                                        if(!empty($subtitle)){
+                                            ?>
+                                            <span class="subtitle"><?= $subtitle ?></span>
+                                            <?php
+                                        }
+                                        ?>
+                                        <div class="rating-comment">
+                                            <?php 
+                                            if(!empty($average_rating)){
+                                                ?>
+                                                <span class="rating"><?= $average_rating ?> <img src="<?= get_stylesheet_directory_uri() ?>/images/star.svg" class="img-fluid" alt="" /></span>
+                                                <?php
+                                            }
+                                            if(!empty($total_ratings)){
+                                                ?>
+                                                <span class="comments">(<?= $total_ratings ?>)</span>
+                                                <?php
+                                            } 
+                                            ?>
+                                        </div>
+                                        <div class="profileinfo">
+                                            <?php 
+                                            $profile_picture    =   get_user_meta($post_author_id, 'profile_picture', true);
+                                            ?>
+                                            <span class="img">
+                                            <?php 
+                                            if($profile_picture){
+                                                echo '<img src="'.esc_url($profile_picture).'" class="img-fluid" alt="Profile Picture">';
+                                            }else{
+                                                echo '<img src="'.get_avatar_url($post_author_id).'" class="img-fluid" alt="Profile Picture">';
+                                            }
+                                            ?>
+                                            </span>
+                                            <span class="from"><?= ucfirst($author_data->display_name) ?></span>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+                            <div class="basic-content">
+                                <h3>Basics:</h3>
+                                <div class="description-listing">
+                                    <?= get_the_content() ?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="data-wrapper-right">
+                            <form action="/checkout/" method="POST" class="checkout-form">
+                                <div class="price">From $<?= number_format($calculatedPrice, 2, '.', ','); ?></div>
+                                <div class="form-group">
+                                    <label>Type:</label>
+                                    <select class="form-control rounded-type" name="type">
+                                        <option value="Project">Project</option>
+                                        <option value="Hourly">Hourly</option>
+                                    </select>
+                                    <input type="hidden" name="total_amount" value="<?= $calculatedPrice ?>">
+                                    <input type="hidden" name="seller_amount" value="<?= $price_from ?>">
+                                    <input type="hidden" name="product_id" value="<?= $postid ?>">
+                                    <input type="hidden" name="post_author" value="<?= $post_author_id ?>">
+                                </div>
+                                <p>Disclaimer:  All buys are subject to sellers approval and verification.  Please check with the seller to verify cost and work time-frame.  </p>
+                                <div class="contact-btn">
+                                    <?php 
+                                    if(is_user_logged_in() && $post_author_id != $current_user_id){
+                                        ?>
+                                        <a href="javascript:;" class="btn btn-secondary btn-large" onClick="addContact(<?= $post_author_id ?>, <?= $current_user_id ?>, <?= $postid ?>, this);">Contact <img src="<?= get_stylesheet_directory_uri() ?>/images/arrow.svg" class="img-fluid" alt="" /></a>
+                                        <?php
+                                    }else if(!is_user_logged_in()){
+                                        ?>
+                                        <a href="/login/" class="btn btn-secondary btn-large">Contact <img src="<?= get_stylesheet_directory_uri() ?>/images/arrow.svg" class="img-fluid" alt="" /></a>
+                                        <?php
+                                    }
+                                    ?>
+                                </div>
+                                <div class="order-btn">
+                                    <button class="btn btn-primary btn-large">Order <img src="<?= get_stylesheet_directory_uri() ?>/images/arrow.svg" class="img-fluid" alt="" /></button>
+                                </div>
+                                <div class="form-list">
+                                    <?php 
+                                    if(is_user_logged_in()){
+                                        $likesData      =   get_user_meta($current_user_id, 'user_wishlist_detail', true);
+                                        $likesDataArray =   (!empty($likesData) && is_array($likesData)) ? (array) $likesData : [];
+                                        if(!empty($likesDataArray) && in_array($postid, $likesDataArray)){
+                                            ?>
+                                            <a onclick="singletvadiLike(<?= $postid ?>, this);" id="logged-wishlist-btn" class="add-wishlist"><img src="<?= get_stylesheet_directory_uri() ?>/images/Like.png" class="img-fluid" alt=""/> Remove to Wish-list</a>
+                                            <?php
+                                        }else{
+                                            ?>
+                                            <a onclick="singletvadiLike(<?= $postid ?>, this);" id="logged-wishlist-btn" class="add-wishlist"><img src="<?= get_stylesheet_directory_uri() ?>/images/wishlist.png" class="img-fluid" alt=""/> Add to Wish-list</a>
+                                            <?php
+                                        }
+                                    }else{
+                                        ?>
+                                        <a class="add-wishlist" id="unlogged-wishlist-btn" data-bs-toggle="modal" data-bs-target="#wishlistmodal"><img src="<?= get_stylesheet_directory_uri() ?>/images/wishlist.png" class="img-fluid" alt=""/> Add to Wish-list</a>
+                                        <?php
+                                    }
+                                    ?>
+                                    <a href="#" class="share"><img src="<?= get_stylesheet_directory_uri() ?>/images/share-square.png" class="img-fluid" alt="" /> Share</a>
+                                    <a href="#" class="report-d"><img src="<?= get_stylesheet_directory_uri() ?>/images/report.png" class="img-fluid" alt="" /> Report</a>
                                 </div>
                             </form>
                         </div>
                     </div>
+                    <div class="about-seller">
+                        <div class="seller-inner">
+                            <div class="global-heading">
+                                <div class="row">
+                                    <div class="col-12 col-lg-12">
+                                        <h2 class="title">About Seller:</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="seller-info">
+                                <div class="profil-pic">
+                                    <?php 
+                                    if($profile_picture){
+                                        echo '<img src="'.esc_url($profile_picture).'" class="img-fluid" alt="Profile Picture">';
+                                    }else{
+                                        echo '<img src="'.get_avatar_url($post_author_id).'" class="img-fluid" alt="Profile Picture">';
+                                    }
+                                    ?>
+                                </div>
+                                <div class="content">
+                                    <span class="from"><?= ucfirst($author_data->display_name) ?></span>
+                                    <div class="rating-contact">
+                                        <div class="rating-comment">
+                                            <span class="rating">5 <img src="<?= get_stylesheet_directory_uri() ?>/images/star.svg" class="img-fluid" alt="" /></span>
+                                            <span class="comments">(288)</span>
+                                        </div>
+                                        <div class="contact-btn mb-0">
+                                            <?php 
+                                            if(is_user_logged_in() && $post_author_id != $current_user_id){
+                                                ?>
+                                                <a href="javascript:;" class="btn btn-secondary btn-large" onClick="addContact(<?= $post_author_id ?>, <?= $current_user_id ?>, <?= $postid ?>, this);">Contact <img src="<?= get_stylesheet_directory_uri() ?>/images/arrow.svg" class="img-fluid" alt="" /></a>
+                                                <?php
+                                            }else if(!is_user_logged_in()){
+                                                ?>
+                                                <a href="/login/" class="btn btn-secondary btn-large">Contact <img src="<?= get_stylesheet_directory_uri() ?>/images/arrow.svg" class="img-fluid" alt="" /></a>
+                                                <?php
+                                            }
+                                            ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="about-content">
+                                <?php 
+                                $profile_info       =   get_user_meta($author_data->ID, 'user_profile_info', true);
+                                echo $profile_info;
+                                ?>
+                            </div>
+                        </div>
+                        <div class="member-with-lang">
+                            <?php 
+                            $registration_date  = $author_data->user_registered;
+                            // Extract the year from the registration date
+                            $joining_year       = date('Y', strtotime($registration_date));
+                            ?>
+                            <div class="member">Member Since: <span><?= $joining_year ?></span></div>
+                            <div class="member">Languages: English, French</div>
+                        </div>
+                    </div>
                 </div>
             </section>
-            <!-- FORM MAIN END -->
+            <!-- MAKER LISITNG END -->
+
+            <!-- PORTFOLIO START -->
+            <section class="portfolio bg-dark">
+                <div class="container-fluid">
+                    <div class="global-heading">
+                        <div class="row">
+                            <div class="col-12 col-lg-12">
+                                <h2 class="title heading-gap">Portfolio:</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="portfolio-wrapper">
+                        <div class="post-gap d-grid grid-3">
+                            <?php 
+                            $arguements1 = [
+                                'post_type'         =>  'auction_listing',
+                                'post_status'       =>  'publish',
+                                'posts_per_page'    =>  3,
+                                'author'            =>  $post_author_id,
+                                'orderby'           =>  'date',
+                                'order'             =>  'DESC',
+                            ];
+                            $listings1       =  get_posts($arguements1);
+                            $listingidArray   =  [];
+                            if(!empty($listings1)){
+                                foreach($listings1 as $lis1){
+                                    $listingidArray[]    =   $lis1->ID;
+                                    $listimg            =   wp_get_attachment_url(get_post_thumbnail_id($lis1->ID), 'full');
+                                    ?>
+                                    <a href="<?= get_permalink($lis1->ID) ?>" class="post-item hover-image">
+                                        <h3><?= ucfirst($lis1->post_title) ?></h3>
+                                        <div class="post-img"><img src="<?= $listimg ?>" class="img-fluid" alt="<?= ucfirst($lis1->post_title) ?>" /></div>
+                                    </a>
+                                    <?php
+                                }
+                            }
+                            ?>
+                        </div>
+                        <div class="more mt-3 text-end"><a href="/makers/" class="btn btn-secondary btn-small">Discover All</a></div>
+                    </div>
+                </div>
+            </section>
+            <!-- PORTFOLIO END -->
+
+            <!-- SIMILAR LISTING START -->
+            <section class="similar-listing">
+                <div class="container-fluid">
+                    <div class="global-heading">
+                        <div class="row">
+                            <div class="col-12 col-lg-12">
+                                <h2 class="title heading-gap">Similar  Listings:</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="similar-listing-wrapper">
+                        <div class="post-gap d-grid grid-3">
+                            <?php 
+                            $arguements2 = [
+                                'post_type'         =>  'auction_listing',
+                                'post_status'       =>  'publish',
+                                'posts_per_page'    =>  3,
+                                'orderby'           =>  'date',
+                                'order'             =>  'DESC',
+                                'post__not_in'      =>  $listingidArray,
+                            ];
+                            $listings2 = get_posts($arguements2);
+                            if(!empty($listings2)){
+                                foreach($listings2 as $lis2){
+                                    $listingidArray[]    =   $lis2->ID;
+                                    $listimg2             =   wp_get_attachment_url(get_post_thumbnail_id($lis2->ID), 'full');
+                                    ?>
+                                    <a href="<?= get_permalink($lis2->ID) ?>" class="post-item hover-image">
+                                        <h3><?= ucfirst($lis2->post_title) ?></h3>
+                                        <div class="post-img"><img src="<?= $listimg2 ?>" class="img-fluid" alt="<?= ucfirst($lis2->post_title) ?>" /></div>
+                                    </a>
+                                    <?php
+                                }
+                            }
+                            ?>
+                        </div>
+                        <div class="more mt-3 text-end"><a href="#" class="btn btn-secondary btn-small">Discover All</a></div>
+                    </div>
+                </div>
+            </section>
+            <!-- SIMILAR LISTING END -->
+
+            <!-- VIEWING HISTORY START -->
+            <section class="viewing-history bg-dark">
+                <div class="container-fluid">
+                    <div class="global-heading">
+                        <div class="row">
+                            <div class="col-12 col-lg-12">
+                                <h2 class="title heading-gap">Viewing History:</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="viewing-listing-wrapper">
+                        <div class="post-gap d-grid grid-3">
+                            <?php 
+                            $arguements3 = [
+                                'post_type'         =>  'auction_listing',
+                                'post_status'       =>  'publish',
+                                'posts_per_page'    =>  3,
+                                'orderby'           =>  'date',
+                                'order'             =>  'DESC',
+                                'post__not_in'      =>  $listingidArray,
+                            ];
+                            $listings3 = get_posts($arguements3);
+                            if(!empty($listings3)){
+                                foreach($listings3 as $lis3){
+                                    $listingidArray[]  =   $lis3->ID;
+                                    $listimg3          =   wp_get_attachment_url(get_post_thumbnail_id($lis3->ID), 'full');
+                                    ?>
+                                    <a href="<?= get_permalink($lis3->ID) ?>" class="post-item hover-image">
+                                        <h3><?= ucfirst($lis2->post_title) ?></h3>
+                                        <div class="post-img"><img src="<?= $listimg3 ?>" class="img-fluid" alt="<?= ucfirst($lis2->post_title) ?>" /></div>
+                                    </a>
+                                    <?php
+                                }
+                            }
+                            ?>
+                        </div>
+                        <div class="more mt-3 text-end"><a href="/maker/" class="btn btn-secondary btn-small">Discover All</a></div>
+                    </div>
+                </div>
+            </section>
+            <!-- VIEWING HISTORY END -->
 
         </article><!-- #post-<?php the_ID(); ?> -->
         <?php

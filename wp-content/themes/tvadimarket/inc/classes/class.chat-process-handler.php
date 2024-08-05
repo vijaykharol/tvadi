@@ -48,6 +48,10 @@ if(!class_exists('TvadiChatProcessHandler', false)){
                     $return['status']       =   true;
                     $return['message']      =   'Connected Succesfully!';
                     $return['chat_url']     =   site_url().'/chat/?chat_id='.$chatid;
+                }else{
+                    $return['status']       =   true;
+                    $return['message']      =   'Connected Succesfully!';
+                    $return['chat_url']     =   site_url().'/chat/?chat_id='.$checkContact->id;
                 }
             }
             echo json_encode($return);
@@ -143,7 +147,7 @@ if(!class_exists('TvadiChatProcessHandler', false)){
                                 }
                             }
                             if(!empty($msg->message)){
-                                $html .= '<p>'.$msg->message.'</p>';
+                                $html .= '<p>'.stripslashes($msg->message).'</p>';
                             }
                             $html .= '<span class="msginfo">'.$chatmsg_username.' '.$msg->sent_datetime.'</span>';
                             $html .= '</li>';    
@@ -241,7 +245,7 @@ if(!class_exists('TvadiChatProcessHandler', false)){
                                             }
                                         }
                                         if(!empty($msg->message)){
-                                            $html .= '<p>'.$msg->message.'</p>';
+                                            $html .= '<p>'.stripslashes($msg->message).'</p>';
                                         }
                                         $html .= '<span class="msginfo">'.$chatmsg_username.' '.$msg->sent_datetime.'</span>';
                                         $html .= '</li>';
@@ -307,6 +311,9 @@ if(!class_exists('TvadiChatProcessHandler', false)){
             return $userdisp;
         }
 
+        /**
+         * UPDATE CHAT SCREEN ON MESSAGE SEND
+         */
         public static function update_chat_screen_cb(){
             global $wpdb;
             $parent_id  =   (isset($_POST['parent_id'])) ? $_POST['parent_id'] : '';
@@ -316,8 +323,9 @@ if(!class_exists('TvadiChatProcessHandler', false)){
                 $return['status']   =   false;
                 $return['message']  =   'Something went wrong please try again. Thanks!';
             }else{
-                $chatUser   =  $wpdb->get_row("SELECT * FROM `".$wpdb->prefix."chat_main_tbl` WHERE id='$parent_id' LIMIT 1");
-                $html       =  '';
+                $chatUser       =  $wpdb->get_row("SELECT * FROM `".$wpdb->prefix."chat_main_tbl` WHERE id='$parent_id' LIMIT 1");
+                $html           =  '';
+                $html2          =  '';
                 if(!empty($chatUser)){
                     if(!empty($chatUser->contact_user_1) && $c_user_id != $chatUser->contact_user_1){
                         $chatuser_id = $chatUser->contact_user_1;
@@ -366,7 +374,7 @@ if(!class_exists('TvadiChatProcessHandler', false)){
                                             }
                                         }
                                         if(!empty($msg->message)){
-                                            $html .= '<p>'.$msg->message.'</p>';
+                                            $html .= '<p>'.stripslashes($msg->message).'</p>';
                                         }
                                         $html .= '<span class="msginfo">'.$chatmsg_username.' '.$msg->sent_datetime.'</span>';
                                         $html .= '</li>';
@@ -391,9 +399,65 @@ if(!class_exists('TvadiChatProcessHandler', false)){
                             </div>
                         </div>
                     </div>';
-                    $return['status']   =   true;
-                    $return['message']  =   'Processed Successfully!';
-                    $return['html']     =   $html;
+                    
+                    //connected users
+                    $connected_users =  $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."chat_main_tbl` WHERE (contact_user_1='$c_user_id') OR (contact_user_2='$c_user_id') ORDER BY last_message_time DESC");
+                    if(!empty($connected_users)){
+                        foreach($connected_users as $u){
+                            if(!empty($u->contact_user_1) && $u->contact_user_1 != $c_user_id){
+                                $uid = $u->contact_user_1;
+                            }else{
+                                $uid = $u->contact_user_2;
+                            }
+                            $uprofile_picture    =   (!empty(get_user_meta($uid, 'profile_picture', true))) ? get_user_meta($uid, 'profile_picture', true) : get_avatar_url($uid);
+                            $firstname 			 =   get_user_meta($uid, 'first_name', true) ? get_user_meta($uid, 'first_name', true) : '';
+                            $lastname 			 =   get_user_meta($uid, 'last_name', true)  ? get_user_meta($uid, 'last_name', true) : '';
+                            $uprofile_info       =   get_user_meta($uid, 'user_profile_info', true);
+                            $listuserinfo	     =   get_userdata($uid);
+                            $unseenMessages		 =	 $wpdb->get_row("SELECT COUNT(id) as total FROM `".$wpdb->prefix."chats_tbl` WHERE status='0' AND sender='$uid' AND receiver='$c_user_id'");
+                            $lasmessage		 	 =	 $wpdb->get_row("SELECT * FROM `".$wpdb->prefix."chats_tbl` WHERE (sender='$uid' AND receiver='$c_user_id') OR sender='$c_user_id' AND receiver='$uid' ORDER BY id DESC LIMIT 1");
+                            $totalunseencounter  =	 $unseenMessages->total;
+                            $userDisplayname	 =   (!empty($firstname) || !empty($lastname)) ? $firstname.' '.$lastname : $listuserinfo->display_name;
+
+                            $html2 .= '<li class="contact active" data-userparent="'.$u->id.'" onclick="showUserChat('.$u->id.', '.$c_user_id.', this)">
+                                <div class="wrap" id="info-list-u">
+                                    <div class="profile_user_outer">
+                                        <div class="user_profile">';
+                                            if(is_user_online($uid)){
+                                                $ustatus = 'online';
+                                            }else{
+                                                $ustatus = 'offline';
+                                            }
+                                            $html2 .= '<span class="contact-status '.$ustatus.'"></span>
+                                            <img src="'.$uprofile_picture.'" alt=""/>
+                                        </div>
+                                        <div class="user_details">
+                                            <div class="user_name">
+                                                <p class="name line-1-text">'.$userDisplayname.'</p>';
+                                                $today 		= date('Y-m-d');
+                                                $date_part 	= date('Y-m-d', strtotime($lasmessage->sent_datetime));
+                                                if($date_part === $today){
+                                                    $html2 .= '<span class="l-datetime">'.date('H:i:s', strtotime($lasmessage->sent_datetime)).'</span>';
+                                                }else{
+                                                    $html2 .= '<span class="l-datetime">'.date('Y-m-d', strtotime($lasmessage->sent_datetime)).'</span>';
+                                                }
+                                            $html2 .= '</div>
+                                            <div class="last-massage">
+                                                <span class="l-message line-1-text">'.stripslashes($lasmessage->message).'</span>';
+                                                if(!empty($totalunseencounter)){ 
+                                                    $html2 .= '<span class="unseen-new">'.number_format($totalunseencounter).'</span>'; 
+                                                }
+                                            $html2 .= '</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>';
+                        }
+                    }
+                    $return['status']           =   true;
+                    $return['message']          =   'Processed Successfully!';
+                    $return['html']             =   $html;
+                    $return['connected_users']  =   $html2;
                 }else{
                     $return['status']   =   false;
                     $return['message']  =   'Something went wrong please try again. Thanks!'; 

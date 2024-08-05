@@ -343,7 +343,7 @@ jQuery(document).ready(function(){
     jQuery(document).on('click', '#send-message-btn', function(){
         var receiver  =     jQuery('#receiver-id').val();
         var sender    =     jQuery('#sender-id').val();
-        var message   =     jQuery('#message-text').val();
+        var message   =     jQuery("#message-text").data("emojioneArea").getText();
         var parent    =     jQuery('#parent-id').val();
         var files     =     jQuery('#file-input')[0].files;
         if(message == '' && files.length <= 0){
@@ -355,15 +355,16 @@ jQuery(document).ready(function(){
             return false;
         }
         if((receiver != '') && (sender != '') && (parent != '')){
-            jQuery('#message-text').text('');
+            jQuery('#message-text').data("emojioneArea").setText('');
             jQuery('.emojionearea-editor').html('');
             jQuery('#image-preview').empty();
             jQuery('#send-message-btn').html('<img src="'+ajax_object.stylesheet_dir+'/images/loader.gif" class="chat-loader" height="25" width="25">');
-            var formData = new FormData();
+            var formattedMessage    =   message.replace(/\n/g, '<br>');
+            var formData            =   new FormData();
             formData.append('action', 'send_message');
             formData.append('receiver', receiver);
             formData.append('sender', sender);
-            formData.append('message', message);
+            formData.append('message', formattedMessage);
             formData.append('parent', parent);
             for(var i = 0; i < files.length; i++) {
                 formData.append('attachments[]', files[i]);
@@ -443,8 +444,10 @@ function emojiTrigger(){
         tonesStyle: "bullet",
         events: {
             keyup: function(editor, event){
-                // console.log(editor.html());
-                // console.log(this.getText());
+                if(event.key === 'Enter' && !event.shiftKey){
+                    event.preventDefault(); 
+                    jQuery('#send-message-btn').click(); 
+                }
             }
         }
     });
@@ -479,7 +482,7 @@ jQuery(document).ready(function(){
 //message scroll to bottm
 function scrollToBottom(){
     if(jQuery('.submessages').length > 0){
-        const submessages = jQuery('.submessages');
+        const submessages = jQuery('#message-content-section');
         submessages.scrollTop(submessages[0].scrollHeight);
     }
 }
