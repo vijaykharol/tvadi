@@ -423,6 +423,13 @@ function showUserChat(parent_id, c_user_id, btn){
                         emojiTrigger();
                         scrollToBottom();
                     }
+                    if(resss.connected_users != ''){
+                        var activeusertab = jQuery('.active-list').attr('data-userparent');
+                        console.log(activeusertab);
+                        jQuery('#connected-users-list').html('');
+                        jQuery('#connected-users-list').html(resss.connected_users);
+                        jQuery('li[data-userparent="'+activeusertab+'"]').addClass('active-list');
+                    }
                 }else{
                     alert(resss.message);
                     location.reload();

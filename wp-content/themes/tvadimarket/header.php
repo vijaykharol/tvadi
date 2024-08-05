@@ -108,6 +108,7 @@
 								}else{
 									?>
 									<li><a class="dropdown-item" href="/dashboard/?dpage=profile">Profile</a></li>
+									<li><a class="dropdown-item" href="/chat/">Chat</a></li>
 									<?php 
 									$hcurrent_user = get_current_user_id();
 									$args_p = [
