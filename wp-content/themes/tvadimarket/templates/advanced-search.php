@@ -45,9 +45,9 @@ get_header();
                                 $platforms          =   wp_get_post_terms($opID, 'platform');
                                 ?>
                                 <div class="trending-block-item hover-image box">
-                                    <div class="single-img radius-15 overflow-hidden" id="adv-side-single-img">
-                                        <div><a href="/channels/?type=p&id=<?= $opID ?>"><img src="<?= $opimageurl ?>" class="img-fluid" alt="<?= ucfirst($op->post_title) ?>"></a></div>
-                                        <div>
+                                    <div class="single-img radius-15 overflow-hidden " id="adv-side-single-img">
+                                        <div class="imgblock"><a href="/channels/?type=p&id=<?= $opID ?>"><img src="<?= $opimageurl ?>" class="img-fluid" alt="<?= ucfirst($op->post_title) ?>"></a></div>
+                                        <div class="priceblock">
                                             <div class="inner-content">
                                                 <div class="price">
                                                     From $<?= $price_from ?>

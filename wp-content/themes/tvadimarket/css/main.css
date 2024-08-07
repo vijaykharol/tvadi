@@ -2876,19 +2876,97 @@ ul.dropdown-menu.user-menu li a:hover {
 }
 div#adv-search-trending-right {
     border: 1px solid #1c686c;
-    padding: 10px 0px 10px 0px;
+    padding: 0;
+}
+div#adv-search-trending-right .side-top.box {
+    padding: 20px;
+    align-items: center;
 }
 div#adv-search-trending-right .box {
     border-bottom: 1px solid #464646;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding: 15px 20px;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+	margin-bottom:0;
+}
+div#adv-search-trending-right .box h4 {
+    margin: 0;
+}
+div#adv-search-trending-right .side-top.box h4 {
+    margin: 0;
+}
+div#adv-search-trending-right .box:last-child {
+    border: 0;
 }
 div#adv-side-single-img {
-    display: flex;
+    display: grid;
+    padding: 20px;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    border-bottom: 1px solid #464646;
+    border-radius: 0;
+    margin: 0;
+}
+#adv-search-trending-right .trending-block-item {
+    padding: 0 !important;
 }
 div#adv-search-trending-right .inner-content .rating-comment span.rating img.img-fluid {
     height: auto !important;
 }
 div#adv-search-trending-right .box span {
     display: block;
+}
+
+/* CHECKOUT PAGE */
+.checkout-page-block {
+    padding: 45px;
+    margin: 60px auto;
+    background: var(--color-dark);
+    max-width: 1000px;
+}
+.checkout-page-block h3 {
+    text-align: center;
+    margin-bottom: 50px;
+}
+#payment-form label {
+    font-size: 20px;
+    line-height: 33px;
+    display: block;
+    margin-bottom: 18px;
+    font-weight: 600;
+}
+#payment-form input,
+#payment-form .total-amount{
+    font-weight: 600;
+    font-size: 18px;
+    border-radius: 10px !important;
+    padding: 15px 25px !important;
+    border: 1px solid #6c6c6c !important;
+    height: 60px;
+    outline: 0;
+    width: 100%;
+}
+#payment-form  #card-element {
+    font-weight: 600;
+    font-size: 18px;
+    border-radius: 10px !important;
+    padding: 20px 25px !important;
+    border: 1px solid #6c6c6c !important;
+    height: 60px;
+    outline: 0;
+    width: 100%;
+}
+#submit-checkout-payment-btn {
+    padding: 12px 20px;
+    min-width: 250px;
+}
+#payment-form .form-group {
+    margin-bottom: 30px !important;
+}
+div#adv-side-single-img .imgblock img{
+	height:200px;
+}
+.adv-content-section {
+    position: relative;
 }

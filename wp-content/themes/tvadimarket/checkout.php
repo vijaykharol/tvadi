@@ -53,8 +53,8 @@ $listing_id     =   (isset($_POST['product_id'])    && !empty($_POST['product_id
     }
 </style>
 <section class="checkout-page">
-    <div class="container-fluid">
-        <div class="row">
+    <div class="container">
+        <div class="checkout-page-block">
             <h3>Checkout</h3>
             <form id="payment-form">
                 <div class="form-group">
