@@ -344,9 +344,10 @@ jQuery(document).ready(function(){
         var receiver  =     jQuery('#receiver-id').val();
         var sender    =     jQuery('#sender-id').val();
         var message   =     jQuery("#message-text").data("emojioneArea").getText();
+        var c_message =     message.replace(/\n/g, '');
         var parent    =     jQuery('#parent-id').val();
         var files     =     jQuery('#file-input')[0].files;
-        if(message == '' && files.length <= 0){
+        if(c_message == '' && files.length <= 0){
             jQuery('button#send-message-btn i').css('color', 'red');
             return false;
         }
@@ -450,7 +451,7 @@ function emojiTrigger(){
         pickerPosition: "right",
         tonesStyle: "bullet",
         events: {
-            keyup: function(editor, event){
+            keydown: function(editor, event){
                 if(event.key === 'Enter' && !event.shiftKey){
                     event.preventDefault(); 
                     jQuery('#send-message-btn').click(); 
@@ -459,6 +460,7 @@ function emojiTrigger(){
         }
     });
 }
+
 jQuery(document).ready(function(){
     jQuery(document).on('click', '#attach-file-btn', function(e){
         e.preventDefault();
