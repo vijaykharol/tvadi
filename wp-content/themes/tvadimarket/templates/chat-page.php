@@ -265,7 +265,7 @@ get_footer();
 				pickerPosition: "right",
 				tonesStyle: "bullet",
 				events: {
-					keyup: function(editor, event){
+					keydown: function(editor, event){
 						if(event.key === 'Enter' && !event.shiftKey){
 							event.preventDefault(); 
 							jQuery('#send-message-btn').click();
