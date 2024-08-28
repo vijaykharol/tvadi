@@ -184,8 +184,11 @@ jQuery(document).ready(function(){
                         jQuery('html, body').animate({scrollTop : 0},800);
 
                         setTimeout(() => {
-                            window.location.href = res.redirecturl;
-                        }, 2000);
+                            // window.location.href = res.redirecturl;
+                            jQuery('form#custom-registration-form').hide();
+                            jQuery('form#custom-register-otp-verification').show();
+                            jQuery('form#custom-register-otp-verification #registered-user-id').val(res.user_id);
+                        }, 3000);
                     }else{
                         jQuery('#hplr-register-btn').html('Register');
                         //hide/empty error
@@ -256,6 +259,72 @@ jQuery(document).ready(function(){
                         jQuery('#l-error').html('');
                         jQuery('#l-error').html(message);
                         jQuery('#l-error').show();
+
+                        jQuery('html, body').animate({scrollTop : 0},800);
+
+                    }
+                }
+            });
+        }
+    });
+
+    //Otp Verification..
+    jQuery(document).on('click', 'button#submit-otp-register-btn', function(e){
+        e.preventDefault();
+        let pchecking = true;
+        var otp_number = jQuery('#otp_number').val();
+        if(otp_number == ''){
+            pchecking = false;
+            jQuery('#otp_number').css('outline', '1px solid red');
+            jQuery('.otp_number-error').remove();
+            jQuery('#otp_number').after('<span class="error otp_number-error" style="display:block; color:red;">This field is required.</span>');
+            jQuery('#otp_number').focus();
+        }else{
+            jQuery('.otp_number-error').remove();
+            jQuery('#otp_number').css('outline', 'none');
+        }
+
+        if(pchecking){
+            jQuery('button#submit-otp-register-btn').html('<img src="/wp-content/plugins/helpful-login-register/front-end/assets/img/loader.gif" class="loader">');
+            var forgotdata = new FormData(jQuery('form#custom-register-otp-verification')[0]);
+            forgotdata.append('action', 'hp_otp_verification_process');
+            jQuery.ajax({
+                url             :   ajax_object.ajax_url,
+                type            :   'POST',
+                data            :   forgotdata,
+                processData     :   false, 
+                contentType     :   false,
+                success: function(response){
+                    let res         =   JSON.parse(response);
+                    let status      =   res.status;
+                    let message     =   res.msg;
+                    if(status){
+                        //hide/empty error
+                        jQuery('#o-error').html('');
+                        jQuery('#o-error').hide();
+
+                        //show success
+                        jQuery('#o-success').html('');
+                        jQuery('#o-success').html(message);
+                        jQuery('#o-success').show();
+                        jQuery('html, body').animate({scrollTop : 0},800);
+                        
+                        jQuery('button#submit-otp-register-btn').html('Submit');
+                        if(res.url){
+                            setTimeout(() => {
+                                window.location.href = res.url;
+                            }, 2000);
+                        }
+                    }else{
+                        jQuery('button#submit-otp-register-btn').html('Submit');
+                        //hide/empty error
+                        jQuery('#o-success').html('');
+                        jQuery('#o-success').hide();
+
+                        //show success
+                        jQuery('#o-error').html('');
+                        jQuery('#o-error').html(message);
+                        jQuery('#o-error').show();
 
                         jQuery('html, body').animate({scrollTop : 0},800);
 

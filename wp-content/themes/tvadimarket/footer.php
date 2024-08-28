@@ -12,6 +12,31 @@
 ?>
 <!-- FOOTER START -->
 <footer class="site-footer">
+	<?php 
+	if(is_user_logged_in() && !is_page('chat')){
+		?>
+		<div class="footer-chat-section">
+			<!-- Chat Button Icon -->
+			<div id="footer-chat-button">
+				<button id="open-chat-model-btn"><img src="<?= get_template_directory_uri() ?>/images/chat-svgrepo-com.svg" alt="Chat" class="chaticon-img"/></button>
+			</div>
+			<!-- Chat Modal -->
+			<div id="footer-chat-modal-tab-section">
+				<div class="chat-modal-header">
+					<span>Chat</span>
+					<span id="chat-close-button">&times;</span>
+				</div>
+				<div class="chat-modal-content">
+					<!-- Insert your chat shortcode or HTML here -->
+					<div class="footer-chat-inner-tab-content">
+						<?= do_shortcode('[tvadi_chat_model]') ?>
+					</div>
+				</div>
+			</div>
+		</div>
+		<?php
+	}
+	?>
 	<div class="footer-top">
 		<div class="container-fluid">
 			<div class="row">

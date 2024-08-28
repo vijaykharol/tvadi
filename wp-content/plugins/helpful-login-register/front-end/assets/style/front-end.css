@@ -255,12 +255,12 @@ img.loader {
     background: var(--color-secondary);
     bottom: 0;
 }
-#l-success {
+#l-success, #o-success {
     font-size: 20px;
     font-weight: 500;
     color: #13bb13;
 }
-#l-error{
+#l-error, #o-error {
     font-size: 20px;
     font-weight: 500;
     color: red;
@@ -439,4 +439,17 @@ img.loader{
 }
 div#dashboard-make-button-section {
     text-align: right;
+}
+button#submit-otp-register-btn {
+    width: 100%;
+}
+img.das-u-profile {
+    background: #1a1a1a;
+}
+span.role-text {
+    text-transform: capitalize;
+}
+a.verify-account-link {
+    color: #6d4eec;
+    font-weight: 600;
 }

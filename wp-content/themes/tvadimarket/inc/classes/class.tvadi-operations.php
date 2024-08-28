@@ -23,6 +23,10 @@ if(!class_exists('TvadiOperations', false)){
             add_action( 'wp_ajax_process_payment', [__CLASS__, 'process_payment_cb'] );
             add_action( 'wp_ajax_nopriv_process_payment', [__CLASS__, 'process_payment_cb'] );
             add_action( 'admin_init', [__CLASS__, 'playlists_handle_csv_export'] );
+
+            add_action( 'admin_init', [__CLASS__, 'restrict_wp_admin_access'] );
+
+            add_action( 'wp_logout', [__CLASS__, 'custom_logout_redirect_cb'] );
         }
 
         public static function stripe_settings_menu_cb(){
@@ -234,6 +238,7 @@ if(!class_exists('TvadiOperations', false)){
          * ADVANCE SEARCH PROCESS HANDLER
          */
         public static function adv_search_cb(){
+            $return         =   [];
             $search         =   (isset($_POST['search']) && !empty($_POST['search'])) ? $_POST['search'] : '';
             //price
             $price_f_m      =   (isset($_POST['price_f_m']) && !empty($_POST['price_f_m'])) ? $_POST['price_f_m'] : '';
@@ -248,6 +253,9 @@ if(!class_exists('TvadiOperations', false)){
             $listing_type   =   (isset($_POST['listing_type']) && !empty($_POST['listing_type'])) ? $_POST['listing_type']      : ['makers_listing', 'outlet_listing', 'market_listing', 'auction_listing'];
 
             $sortby         =   (isset($_POST['sortby']) && !empty($_POST['sortby'])) ? $_POST['sortby'] : 'date_desc';
+
+            $per_page       =   (isset($_POST['per_page']) && !empty($_POST['per_page'])) ? $_POST['per_page'] : 10;
+            $paged          =   (isset($_POST['paged']) && !empty($_POST['paged'])) ? $_POST['paged'] : 1;
 
             //rating
             $rating_filter_mode    =   (isset($_POST['rating_filter_mode']) && !empty($_POST['rating_filter_mode'])) ? $_POST['rating_filter_mode'] : '';
@@ -268,7 +276,8 @@ if(!class_exists('TvadiOperations', false)){
 
             $arguements = [
                 'post_status'       =>  'publish',
-                'posts_per_page'    =>  -1,
+                'posts_per_page'    =>  $per_page,
+                'paged'             =>  $paged
             ];
             
             //post type
@@ -375,36 +384,54 @@ if(!class_exists('TvadiOperations', false)){
                     ],
                 ];
             }
-            $makers = get_posts($arguements);
-            if(!empty($makers)){
-                foreach($makers as $maK){
-                    $mkID               =   $maK->ID;
+            $maKers         =   new WP_Query($arguements);
+            $html           =   '';
+            $pagination     =   '';
+            if($maKers->have_posts()){
+                while($maKers->have_posts()){
+                    $maKers->the_post();
+                    $mkID               =   get_the_ID();
                     $maker_image_url    =   wp_get_attachment_url(get_post_thumbnail_id($mkID));
                     $price_from         =   get_post_meta($mkID, 'price_from', true);
                     $total_ratings      =   get_post_meta($mkID, 'total_ratings', true);
                     $average_rating     =   get_post_meta($mkID, 'average_rating', true);
-                    ?>
-                    <a href="<?= get_permalink($mkID) ?>" class="listing-item">
-                        <div class="item-img"><img src="<?= $maker_image_url ?>" class="img-fluid" alt="<?= ucfirst($maK->post_title) ?>"/></div>
+                    $html .= '
+                    <a href="'.get_permalink($mkID).'" class="listing-item">
+                        <div class="item-img"><img src="'.$maker_image_url.'" class="img-fluid" alt="'.ucfirst(get_the_title()).'"/></div>
                         <div class="item-content">
-                            <h4 class="title"><?= ucfirst($maK->post_title) ?></h4>
-                            <div class="maK-desc"><p><?= substr(strip_tags($maK->post_content), 0, 80).'...' ?></p></div>
+                            <h4 class="title">'.ucfirst(get_the_title()).'</h4>
+                            <div class="maK-desc"><p>'.substr(strip_tags(get_the_content()), 0, 80).'..'.'</p></div>
                             <div class="inner-content">
                                 <div class="rating-comment">
-                                    <span class="rating"><?= $average_rating ?> <img src="<?= get_stylesheet_directory_uri() ?>/images/star.svg" class="img-fluid" alt="" /></span>
-                                    <span class="comments">(<?= $total_ratings ?>)</span>
+                                    <span class="rating">'.$average_rating.' <img src="'.get_stylesheet_directory_uri().'/images/star.svg" class="img-fluid" alt="" /></span>
+                                    <span class="comments">('.$total_ratings.')</span>
                                 </div>
                                 <div class="price">
-                                    From $<?= $price_from ?>
+                                    From $'.$price_from.'
                                 </div>
                             </div>
                         </div>
                     </a>
-                    <?php
+                    ';
                 }
             }else{
-                echo '<p class="notfound-makers">No search results found.</p>';
+                $html .='<p class="notfound-makers">No search results found.</p>';
             }
+
+            $pagination .= '
+            <div class="pagination">
+                '.paginate_links(array(
+                    'total'         =>  $maKers->max_num_pages,
+                    'current'       =>  $paged,
+                    'format'        =>  '?paged=%#%',
+                    'prev_text'     =>  __('« Previous'),
+                    'next_text'     =>   __('Next »'),
+                )).'
+            </div>';
+
+            $return['html']         =   $html;
+            $return['pagination']   =   $pagination;
+            echo json_encode($return);
             exit();
         }
 
@@ -891,6 +918,25 @@ if(!class_exists('TvadiOperations', false)){
                 </form>
             </div>
             <?php
+        }
+
+        /**
+         * Restrict wp admin access
+         */
+        public static function restrict_wp_admin_access(){
+            if(is_admin() && !current_user_can('administrator') && !(defined('DOING_AJAX') && DOING_AJAX)){
+                wp_redirect(home_url());
+                exit;
+            }
+        }
+
+        /**
+         * REDIRECTING ON A PARTICULAR LOGIN PAGE AFTER LOGOUT
+         */
+        public static function custom_logout_redirect_cb(){
+            $redirect_url = home_url('/login');
+            wp_redirect($redirect_url);
+            exit();
         }
     }
     TvadiOperations::init();

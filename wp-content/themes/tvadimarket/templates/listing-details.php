@@ -125,7 +125,7 @@ $qr_image                               =   generate_qr_code($QRdata);
                 ?>
                 <div class="semi-columns-content-block">
                     <h4 class="title">Reference Number</h4>
-                    <div class="content-inner"><?= $post_phone ?></div>
+                    <div class="content-inner"><?= $post_sku ?></div>
                 </div>
                 <div class="semi-columns-content-block">
                     <h4 class="title">Phone</h4>
@@ -151,7 +151,7 @@ $qr_image                               =   generate_qr_code($QRdata);
                 if($current_user_id == $post_author_id){
                     ?>
                     <div class="text-end">
-                        <a href="/make-listing/?id=<?= $postid ?>" class="btn btn-primary btn-large">Go Back <img src="<?= get_stylesheet_directory_uri() ?>/images/arrow.svg" class="img-fluid" alt=""></a>
+                        <a href="/make-listing/?id=<?= $postid ?>" class="btn btn-primary btn-large"><img src="<?= get_stylesheet_directory_uri() ?>/images/arrow-left.svg" class="img-fluid" alt=""> Go Back</a>
                         <a href="/make-listing/?id=<?= $postid ?>" class="btn btn-primary btn-large">Update <img src="<?= get_stylesheet_directory_uri() ?>/images/arrow.svg" class="img-fluid" alt=""></a>
                     </div>
                     <?php
@@ -197,7 +197,7 @@ $qr_image                               =   generate_qr_code($QRdata);
                 if($current_user_id == $post_author_id){
                     ?>
                     <div class="text-end" id="text-end-top">
-                    <a href="/make-listing/?id=<?= $postid ?>" class="btn btn-primary btn-large">Go Back <img src="<?= get_stylesheet_directory_uri() ?>/images/arrow.svg" class="img-fluid" alt="" /></a>
+                    <a href="/make-listing/?id=<?= $postid ?>" class="btn btn-primary btn-large"><img src="<?= get_stylesheet_directory_uri() ?>/images/arrow-left.svg" class="img-fluid" alt="" /> Go Back</a>
                         <a href="/make-listing/?id=<?= $postid ?>" class="btn btn-primary btn-large">Update <img src="<?= get_stylesheet_directory_uri() ?>/images/arrow.svg" class="img-fluid" alt="" /></a>
                     </div>
                     <?php

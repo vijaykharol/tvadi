@@ -1228,6 +1228,7 @@ select {
 .sort-by {
     max-width: 240px;
     flex: 240px;
+    margin-left: 5px;
 }
 .sort-by select {
     width: 100%;
@@ -2969,4 +2970,25 @@ div#adv-side-single-img .imgblock img{
 }
 .adv-content-section {
     position: relative;
+}
+.filter-itemshow .pagination {
+    justify-content: center;
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+.filter-itemshow .pagination .page-numbers {
+    background: #6d4eec;
+    padding: 5px 15px;
+    text-align: center;
+    font-weight: 600;
+}
+span.page-numbers.current {
+    background: #d8e4eb !important;
+    color: #000;
+}
+.filter-itemshow .pagination .page-numbers:hover {
+    color: #fff;
+    text-decoration: none;
 }

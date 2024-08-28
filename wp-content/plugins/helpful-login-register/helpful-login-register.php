@@ -78,6 +78,10 @@ function hp_on_plugin_activation_cb(){
             'title'     =>  'Dashboard',
             'content'   =>  '[helpful_dashboard]',
         ],
+        [
+            'title'     =>  'Verify Account',
+            'content'   =>  '[helpful_verify_account]',
+        ],
     ];
 
     foreach($pages as $page){

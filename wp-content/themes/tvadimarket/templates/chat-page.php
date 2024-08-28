@@ -12,9 +12,6 @@ if(!is_user_logged_in()){
 get_header();
 ?>
 <meta charset="UTF-8">
-<link rel="stylesheet" href="<?= get_template_directory_uri() ?>/emojionearea-master/dist/emojionearea.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-<link rel="stylesheet" href="<?= get_template_directory_uri() ?>/css/chatstyle.css?<?= time() ?>">
 <?php 
 global $wpdb;
 $user 				= 	wp_get_current_user();
@@ -30,6 +27,7 @@ function get_username_by_id($id){
 	$userdisp		=   (!empty($first)  || !empty($last)) ? $first.' '.$last : $uinfo->display_name;
 	return $userdisp;
 }
+$defaultProfilesrc = site_url().'/wp-content/themes/tvadimarket/default-profile/defaultProfilePurple.png';
 ?>
 <div class="chat-system">
     <section class="chat-section">
@@ -42,7 +40,7 @@ function get_username_by_id($id){
 							if($profile_picture){
 								echo '<img src="'.esc_url($profile_picture).'" id="profile-img" class="online" alt="">';
 							}else{
-								echo '<img src="'.get_avatar_url($c_user_id).'" id="profile-img" class="online" alt="">';
+								echo '<img src="'.$defaultProfilesrc.'" id="profile-img" class="online" alt="">';
 							}
 							$cfirstname 		=  get_user_meta($c_user_id, 'first_name', true)  ? get_user_meta($c_user_id, 'first_name', true) : '';
 							$clastname 			=  get_user_meta($c_user_id, 'last_name', true)   ? get_user_meta($c_user_id, 'last_name', true) : '';
@@ -63,7 +61,7 @@ function get_username_by_id($id){
 									}else{
 										$uid = $u->contact_user_2;
 									}
-									$uprofile_picture    =   (!empty(get_user_meta($uid, 'profile_picture', true))) ? get_user_meta($uid, 'profile_picture', true) : get_avatar_url($uid);
+									$uprofile_picture    =   (!empty(get_user_meta($uid, 'profile_picture', true))) ? get_user_meta($uid, 'profile_picture', true) : $defaultProfilesrc;
 									$firstname 			 =   get_user_meta($uid, 'first_name', true) ? get_user_meta($uid, 'first_name', true) : '';
 									$lastname 			 =   get_user_meta($uid, 'last_name', true)  ? get_user_meta($uid, 'last_name', true) : '';
 									$uprofile_info       =   get_user_meta($uid, 'user_profile_info', true);
@@ -144,7 +142,7 @@ function get_username_by_id($id){
 							}else{
 								$chatuser_id = $chatUser->contact_user_2;
 							}
-							$chatuserprofile_pic  =   (!empty(get_user_meta($chatuser_id, 'profile_picture', true))) ? get_user_meta($chatuser_id, 'profile_picture', true) : get_avatar_url($chatuser_id);
+							$chatuserprofile_pic  =   (!empty(get_user_meta($chatuser_id, 'profile_picture', true))) ? get_user_meta($chatuser_id, 'profile_picture', true) : $defaultProfilesrc;
 							$chat_firstname 	  =   get_user_meta($chatuser_id, 'first_name', true) ? get_user_meta($chatuser_id, 'first_name', true) : '';
 							$chat_lastname 		  =   get_user_meta($chatuser_id, 'last_name', true) ? get_user_meta($chatuser_id, 'last_name', true) : '';
 							$chatuser_info 		  =   get_userdata($chatuser_id);
@@ -181,10 +179,15 @@ function get_username_by_id($id){
 													$attachmentsData = explode(',', $attachments);
 													if(!empty($attachmentsData) && is_array(($attachmentsData))){
 														foreach($attachmentsData as $adata){
-															$url = site_url().'/wp-content/uploads/chat-attachments/'.$adata;
-															echo '<span class="attc"><img class="attachments" src="'.$url.'"></span>';
+															$url 				= 	site_url().'/wp-content/uploads/chat-attachments/'.$adata;
+															$file_extension     =   pathinfo($url, PATHINFO_EXTENSION);
+                                                    		$image_extensions   =   ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'tiff', 'svg', 'ico', 'jfif', 'pjpeg', 'pjp'];
+															if(in_array(strtolower($file_extension), $image_extensions)){
+																echo '<span class="attc"><img class="attachments" src="'.$url.'"></span>';
+															}else{
+																echo '<span class="attc"><img class="attachments" src="'.site_url().'/wp-content/themes/tvadimarket/images/attached.png" alt="'.$adata.'"><br><a href="'.$url.'" download>'.$adata.'</a></span>';
+															}
 														}
-														
 													}
 												}
 												if(!empty($msg->message)){
@@ -213,7 +216,7 @@ function get_username_by_id($id){
 										<input type="hidden" name="sender_id" id="sender-id" value="<?= $c_user_id ?>">
 										<input type="hidden" name="receiver_id" id="receiver-id" value="<?= $chatuser_id ?>">
 										<input type="hidden" name="parent_id" id="parent-id" value="<?= $parent_chat_id ?>">
-										<input type="file" id="file-input" name="attachments[]" accept="image/*" multiple style="display:none;">
+										<input type="file" id="file-input" name="attachments[]" multiple style="display:none;">
 										<!-- <button id="attach-file-btn">
 											<svg xmlns="http://www.w3.org/2000/svg" class="svg-icon svg-icon--send-img" viewBox="0 0 45.7 45.7">
 							                    <path d="M6.6,45.7A6.7,6.7,0,0,1,0,39.1V6.6A6.7,6.7,0,0,1,6.6,0H39.1a6.7,6.7,0,0,1,6.6,6.6V39.1h0a6.7,6.7,0,0,1-6.6,6.6ZM39,4H6.6A2.6,2.6,0,0,0,4,6.6V39.1a2.6,2.6,0,0,0,2.6,2.6H39.1a2.6,2.6,0,0,0,2.6-2.6V6.6A2.7,2.7,0,0,0,39,4Zm4.7,35.1Zm-4.6-.4H6.6a2.1,2.1,0,0,1-1.8-1.1,2,2,0,0,1,.3-2.1l8.1-10.4a1.8,1.8,0,0,1,1.5-.8,2.4,2.4,0,0,1,1.6.7l4.2,5.1,6.6-8.5a1.8,1.8,0,0,1,1.6-.8,1.8,1.8,0,0,1,1.5.8L40.7,35.5a2,2,0,0,1,.1,2.1A1.8,1.8,0,0,1,39.1,38.7Zm-17.2-4H35.1l-6.5-8.6-6.5,8.4C22,34.6,22,34.7,21.9,34.7Zm-11.2,0H19l-4.2-5.1Z" fill="#f68b3c"></path>
@@ -255,8 +258,6 @@ function get_username_by_id($id){
 <?php
 get_footer();
 ?>
-<script src="<?= get_template_directory_uri() ?>/emojionearea-master/dist/emojionearea.js"></script>
-<script src="https://js.pusher.com/8.0.1/pusher.min.js"></script>
 <script>
 	jQuery(document).ready(function(){
 		trigger_emojis();

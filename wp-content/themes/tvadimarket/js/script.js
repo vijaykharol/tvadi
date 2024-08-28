@@ -631,6 +631,17 @@ jQuery(document).ready(function(){
   jQuery(document).on('change', '#adv-sortby-filters', function(){
     advSearch();
   });
+  jQuery(document).on('change', 'select#adv-per-page', function(){
+    advSearch();
+  });
+
+  jQuery(document).on('click', 'div#adv-pagination-section .pagination a.page-numbers', function(e){
+    e.preventDefault();
+    jQuery('html, body').animate({ scrollTop: 500 }, 800);
+    jQuery('a.page-numbers').removeClass('active');
+    var page = jQuery(this).addClass('active');
+    advSearch();
+  });
 });
 
 //Filter Makers
@@ -671,7 +682,14 @@ function advSearch(){
   
   //sortby
   var sortby      =   jQuery('#adv-sortby-filters').find(':selected').val();
+  var per_page    =   jQuery('select#adv-per-page').find(':selected').val();
+  var paged       =   1;
+  if(jQuery('a.page-numbers.active').length > 0){
+    paged = jQuery('a.page-numbers.active').attr('href').split('paged=')[1]
+  }
+  // console.log(per_page);
   jQuery('.adv-main-loader').show();
+  jQuery('#makers-filtered-listing-section').html('');
   //AJAX REQUEST
   jQuery.ajax({
     url             :   ajax_object.ajax_url,
@@ -690,10 +708,17 @@ function advSearch(){
       rating_filter_mode : rating_filter_mode,
       min_rating    :   min_rating,
       max_rating    :   max_rating,
+      per_page      :   per_page,
+      paged         :   paged,
     },
     success: function(response){
+      const obj       =   JSON.parse(response);
+      var html        =   obj.html;
+      var pagination  =   obj.pagination;
       jQuery('#makers-filtered-listing-section').html('');
-      jQuery('#makers-filtered-listing-section').html(response);
+      jQuery('div#adv-pagination-section').html('');
+      jQuery('#makers-filtered-listing-section').html(html);
+      jQuery('div#adv-pagination-section').html(pagination);
       jQuery('.adv-main-loader').hide();
     },
     error: function(reserr){

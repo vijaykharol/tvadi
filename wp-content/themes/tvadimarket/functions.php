@@ -193,19 +193,26 @@ if ( defined( 'JETPACK__VERSION' ) ) {
  * ENQUEUE FILES
  */
 
-function tvadi_enqueue_scripts_styles() {
+function tvadi_enqueue_scripts_styles(){
+	$version = time();
     // Enqueue Theme stylesheets
-    wp_enqueue_style('tvadi-bootstrap-min-css', get_template_directory_uri() . '/css/bootstrap.min.css', array(), time(), 'all');
+    wp_enqueue_style('tvadi-bootstrap-min-css', get_template_directory_uri() . '/css/bootstrap.min.css', array(), $version, 'all');
 
-	wp_enqueue_style('tvadi-main-css', get_template_directory_uri() . '/css/main.css', array(), time(), 'all');
+	wp_enqueue_style('tvadi-main-css', get_template_directory_uri() . '/css/main.css', array(), $version, 'all');
 
-	wp_enqueue_style('tvadi-owl-carousel-min', get_template_directory_uri() . '/css/owl.carousel.min.css', array(), time(), 'all');
+	wp_enqueue_style('tvadi-owl-carousel-min', get_template_directory_uri() . '/css/owl.carousel.min.css', array(), $version, 'all');
 
-	wp_enqueue_style('tvadi-owl-theme-default-min', get_template_directory_uri() . '/css/owl.theme.default.min.css', array(), time(), 'all');
+	wp_enqueue_style('tvadi-owl-theme-default-min', get_template_directory_uri() . '/css/owl.theme.default.min.css', array(), $version, 'all');
 
-	wp_enqueue_style('tvadi-animate-min', get_template_directory_uri() . '/css/animate.min.css', array(), time(), 'all');
+	wp_enqueue_style('tvadi-animate-min', get_template_directory_uri() . '/css/animate.min.css', array(), $version, 'all');
 
-	wp_enqueue_style('tvadi-responsive', get_template_directory_uri() . '/css/responsive.css', array(), time(), 'all');
+	wp_enqueue_style('tvadi-responsive', get_template_directory_uri() . '/css/responsive.css', array(), $version, 'all');
+
+	wp_enqueue_style('tvadi-emojionearea-min-css', get_template_directory_uri() . '/emojionearea-master/dist/emojionearea.min.css', array(), $version, 'all');
+
+	wp_enqueue_style('tvadi-font-awesome-min-css', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css', array(), $version, 'all');
+
+	wp_enqueue_style('tvadi-chatstyle-css', get_template_directory_uri() . '/css/chatstyle.css', array(), $version, 'all');
 
 	// Enqueue Theme scripts
     wp_enqueue_script('jquery');
@@ -214,21 +221,25 @@ function tvadi_enqueue_scripts_styles() {
     wp_enqueue_script('jquery-ui-core');
     wp_enqueue_script('jquery-ui-slider'); // Enqueue the slider component
 
-	wp_enqueue_script('tvadi-popper-min', get_template_directory_uri() . '/js/popper.min.js', array('jquery'), time(), true);
+	wp_enqueue_script('tvadi-popper-min', get_template_directory_uri() . '/js/popper.min.js', array('jquery'), $version, true);
 
-	wp_enqueue_script('tvadi-bootstrap-min-js', get_template_directory_uri() . '/js/bootstrap.min.js', array('jquery'), time(), true);
+	wp_enqueue_script('tvadi-bootstrap-min-js', get_template_directory_uri() . '/js/bootstrap.min.js', array('jquery'), $version, true);
 
-	wp_enqueue_script('tvadi-owl-carousel-min-js', get_template_directory_uri() . '/js/owl.carousel.min.js', array('jquery'), time(), true);
+	wp_enqueue_script('tvadi-owl-carousel-min-js', get_template_directory_uri() . '/js/owl.carousel.min.js', array('jquery'), $version, true);
 
-	wp_enqueue_script('tvadi-wow-min-js', get_template_directory_uri() . '/js/wow.min.js', array('jquery'), time(), true);
+	wp_enqueue_script('tvadi-wow-min-js', get_template_directory_uri() . '/js/wow.min.js', array('jquery'), $version, true);
 
-	wp_enqueue_script('tvadi-script-js', get_template_directory_uri() . '/js/script.js', array('jquery'), time(), true);
+	wp_enqueue_script('tvadi-script-js', get_template_directory_uri() . '/js/script.js', array('jquery'), $version, true);
 	// Pass AJAX URL to script
 	wp_localize_script('tvadi-script-js', 'ajax_object', array('ajax_url' => admin_url('admin-ajax.php')));
 
-	wp_enqueue_script('tvadi-make-listing-js', get_template_directory_uri() . '/js/make-listing.js', array('jquery'), time(), true);
+	wp_enqueue_script('tvadi-make-listing-js', get_template_directory_uri() . '/js/make-listing.js', array('jquery'), $version, true);
 	// Pass AJAX URL to script
 	wp_localize_script('tvadi-make-listing-js', 'ajax_object', array('ajax_url' => admin_url('admin-ajax.php'), 'stylesheet_dir' => get_stylesheet_directory_uri()));
+
+	wp_enqueue_script('tvadi-emojionearea-js', get_template_directory_uri() . '/emojionearea-master/dist/emojionearea.js', array('jquery'), $version, true);
+
+	wp_enqueue_script('tvadi-pusher-min-js', 'https://js.pusher.com/8.0.1/pusher.min.js', array('jquery'), $version, true);
 
 }
 add_action('wp_enqueue_scripts', 'tvadi_enqueue_scripts_styles');
@@ -337,3 +348,27 @@ function is_user_online($user_id){
     $is_online = get_user_meta($user_id, 'is_online', true);
     return $is_online === '1';
 }
+
+/**
+ * DEFINE DEFAULT PROFILE PIC
+ */
+define('DEFAULT_PROFILE_PIC', site_url().'/wp-content/themes/tvadimarket/default-profile/defaultProfilePurple.png');
+
+/**
+ * Verify old users
+ */
+/*
+add_action('init', 'verify_old_users_cb');
+function verify_old_users_cb(){
+    $args = array(
+        'fields' => 'ID',  
+    );
+    $user_query 	= 	new WP_User_Query($args);
+    $users 			= 	$user_query->get_results();
+    if(!empty($users)){
+        foreach($users as $user_id){
+            update_user_meta($user_id, 'user_verification_status', 1);
+        }
+    }
+}
+*/

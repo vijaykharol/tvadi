@@ -126,7 +126,7 @@ if(have_posts()) :
                                             if($profile_picture){
                                                 echo '<img src="'.esc_url($profile_picture).'" class="img-fluid" alt="Profile Picture">';
                                             }else{
-                                                echo '<img src="'.get_avatar_url($post_author_id).'" class="img-fluid" alt="Profile Picture">';
+                                                echo '<img src="'.DEFAULT_PROFILE_PIC.'" class="img-fluid" alt="Profile Picture">';
                                             }
                                             ?>
                                             </span>
@@ -147,9 +147,9 @@ if(have_posts()) :
                                 <div class="price">From $<?= number_format($calculatedPrice, 2, '.', ','); ?></div>
                                 <div class="form-group">
                                     <label>Type:</label>
-                                    <select class="form-control rounded-type" name="type">
-                                        <option value="Project">Project</option>
-                                        <option value="Hourly">Hourly</option>
+                                    <select class="form-control rounded-type" name="type" disabled="true">
+                                        <option value="Project" <?php if($post_hourly_onetime == 'One Time') echo 'selected'; ?>>Project</option>
+                                        <option value="Hourly" <?php if($post_hourly_onetime == 'Hourly') echo 'selected'; ?>>Hourly</option>
                                     </select>
                                     <input type="hidden" name="total_amount" value="<?= $calculatedPrice ?>">
                                     <input type="hidden" name="seller_amount" value="<?= $price_from ?>">
@@ -214,7 +214,7 @@ if(have_posts()) :
                                     if($profile_picture){
                                         echo '<img src="'.esc_url($profile_picture).'" class="img-fluid" alt="Profile Picture">';
                                     }else{
-                                        echo '<img src="'.get_avatar_url($post_author_id).'" class="img-fluid" alt="Profile Picture">';
+                                        echo '<img src="'.DEFAULT_PROFILE_PIC.'" class="img-fluid" alt="Profile Picture">';
                                     }
                                     ?>
                                 </div>

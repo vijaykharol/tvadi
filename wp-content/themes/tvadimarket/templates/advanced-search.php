@@ -110,6 +110,15 @@ get_header();
                             <option value="price_desc">Sort by price: high to low</option>
                         </select>
                     </div>
+                    <div class="sort-by">
+                        <select class="form-control" name="per_page" id="adv-per-page">
+                            <option value="10" selected="selected">10</option>
+                            <option value="20">20</option>
+                            <option value="30">30</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
                 </div>
             </form>
         </div>
@@ -287,28 +296,30 @@ get_header();
                 <div class="filter-itemshow">
                     <div class="listing-sort list" id="makers-filtered-listing-section">
                         <?php 
+                        $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
                         $arguements = [
                             'post_type'         =>  ['makers_listing', 'market_listing', 'auction_listing', 'outlet_listing'],
                             'post_status'       =>  'publish',
-                            'posts_per_page'    =>  -1,
+                            'posts_per_page'    =>  10, // Adjust the number of posts per page
                             'orderby'           =>  'date',
-                            'order'             =>  'DESC'
+                            'order'             =>  'DESC',
+                            'paged'             =>  $paged
                         ];
-                        $maKers = get_posts($arguements);
-                        if(!empty($maKers)){
-                            foreach($maKers as $maK){
-                                $mkID               =   $maK->ID;
+                        $maKers = new WP_Query($arguements);
+                        if($maKers->have_posts()){
+                            while($maKers->have_posts()){
+                                $maKers->the_post();
+                                $mkID               =   get_the_ID();
                                 $maker_image_url    =   wp_get_attachment_url(get_post_thumbnail_id($mkID));
-                                $price_from         =   get_post_meta($mkID, 'price_from', true);
                                 $price_from         =   get_post_meta($mkID, 'price_from', true);
                                 $total_ratings      =   get_post_meta($mkID, 'total_ratings', true);
                                 $average_rating     =   get_post_meta($mkID, 'average_rating', true);
                                 ?>
                                 <a href="<?= get_permalink($mkID) ?>" class="listing-item">
-                                    <div class="item-img"><img src="<?= $maker_image_url ?>" class="img-fluid" alt="<?= ucfirst($maK->post_title) ?>"/></div>
+                                    <div class="item-img"><img src="<?= $maker_image_url ?>" class="img-fluid" alt="<?= ucfirst(get_the_title()) ?>"/></div>
                                     <div class="item-content">
-                                        <h4 class="title"><?= ucfirst($maK->post_title) ?></h4>
-                                        <div class="maK-desc"><p><?= substr(strip_tags($maK->post_content), 0, 80).'..' ?></p></div>
+                                        <h4 class="title"><?= ucfirst(get_the_title()) ?></h4>
+                                        <div class="maK-desc"><p><?= substr(strip_tags(get_the_content()), 0, 80).'..' ?></p></div>
                                         <div class="inner-content">
                                             <div class="price">
                                                 From $<?= $price_from ?>
@@ -322,10 +333,25 @@ get_header();
                                 </a>
                                 <?php
                             }
-                        }else{
-                            '<p class="notfound-makers">Nothing Found.</p>';
+                            wp_reset_postdata();
+                        } else {
+                            echo '<p class="notfound-makers">Nothing Found.</p>';
                         }
                         ?>
+                    </div>
+                    <!-- Pagination Links -->
+                    <div id="adv-pagination-section">
+                        <div class="pagination">
+                            <?php
+                            echo paginate_links(array(
+                                'total' => $maKers->max_num_pages,
+                                'current' => $paged,
+                                'format' => '?paged=%#%',
+                                'prev_text' => __('« Previous'),
+                                'next_text' => __('Next »'),
+                            ));
+                            ?>
+                        </div>
                     </div>
                 </div>
             </div>

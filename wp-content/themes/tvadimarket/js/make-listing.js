@@ -406,6 +406,7 @@ function showUserChat(parent_id, c_user_id, btn){
     if(parent_id != ''){
         jQuery('li.contact').removeClass('active-list');
         jQuery(btn).addClass('active-list');
+        jQuery('#tvadi-user-messages-section').html('<div class="chat-loader-section"><img src="'+ajax_object.stylesheet_dir+'/images/loader.gif" class="loader"></div>');
         jQuery.ajax({
             url             :   ajax_object.ajax_url,
             type            :   'POST',
@@ -461,6 +462,7 @@ function emojiTrigger(){
     });
 }
 
+/*
 jQuery(document).ready(function(){
     jQuery(document).on('click', '#attach-file-btn', function(e){
         e.preventDefault();
@@ -487,6 +489,53 @@ jQuery(document).ready(function(){
         }
     });
 });
+*/
+
+jQuery(document).ready(function() {
+    jQuery(document).on('click', '#attach-file-btn', function(e) {
+        e.preventDefault();
+        jQuery('#file-input').click();
+    });
+
+    jQuery(document).on('change', '#file-input', function(e) {
+        var files = e.target.files;
+        jQuery('#image-preview').empty();
+        if (files) {
+            Array.from(files).forEach(file => {
+                var preview = createFilePreview(file);
+                jQuery('#image-preview').append(preview); 
+            });
+        }
+    });
+
+    function createFilePreview(file) {
+        var fileName = file.name;
+        var fileType = file.type;
+
+        var preview = jQuery('<div />', {
+            'class': 'file-preview'
+        });
+
+        if (fileType.match('image.*')) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var img = jQuery('<img />', {
+                    'src': e.target.result,
+                    'class': 'preview-image',
+                    'alt': fileName
+                });
+                preview.append(img);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            preview.append('<img src="'+ajax_object.stylesheet_dir+'/images/attached.png" class="default-file-icon" alt="File Icon">');
+        }
+
+        preview.append('<span class="file-name">' + fileName + '</span>');
+        return preview;
+    }
+});
+
 
 //message scroll to bottm
 function scrollToBottom(){
@@ -512,3 +561,14 @@ function validateMessage(message){
     }
     return true;
 }
+
+/** JS For Footer Chat Model */
+jQuery(document).ready(function(){
+    jQuery(document).on('click', 'button#open-chat-model-btn', function(){
+        jQuery('div#footer-chat-modal-tab-section').show();
+    });
+
+    jQuery(document).on('click', 'div#footer-chat-modal-tab-section span#chat-close-button', function(){
+        jQuery('div#footer-chat-modal-tab-section').hide();
+    });
+});

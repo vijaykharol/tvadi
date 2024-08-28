@@ -35,6 +35,14 @@ if(!class_exists('HplrDashboard', false)){
                 $profile_picture    =   get_user_meta($user_id, 'profile_picture', true);
                 $profile_cover      =   get_user_meta($user_id, 'profile_cover_picture', true);
                 $profile_info       =   get_user_meta($user_id, 'user_profile_info', true);
+                $profileRandNo      =   rand(1, 5);
+                $role_map = [
+                    'makers'  => 'Maker',
+                    'outlets' => 'Outlet',
+                ];
+                $display_roles = array_map(function($role) use ($role_map){
+                    return isset($role_map[$role]) ? $role_map[$role] : $role;
+                }, $current_user->roles);
                 ?>
                 <div class="hplr-dashboard">
                     <div class="make" id="dashboard-make-button-section">
@@ -56,15 +64,15 @@ if(!class_exists('HplrDashboard', false)){
                                     <?php 
                                     $cPage = (isset($_REQUEST['dpage']) && !empty($_REQUEST['dpage'])) ? $_REQUEST['dpage'] : 'profile';
                                     ?>
-                                    <li><a href="?dpage=profile" class="<?php if($cPage == 'profile'){ echo 'active';} ?>">Profile</a></li>
-                                    <li><a href="?dpage=edit-profile" class="<?php if($cPage == 'edit-profile'){ echo 'active';} ?>">Edit Profile</a></li>
-                                    <li><a href="?dpage=c-password" class="<?php if($cPage == 'c-password'){ echo 'active';} ?>">Change Password</a></li>
+                                    <li><a href="?dpage=profile" class="<?php if($cPage == 'profile'){ echo 'active'; } ?>">Profile</a></li>
+                                    <li><a href="?dpage=edit-profile" class="<?php if($cPage == 'edit-profile'){ echo 'active'; } ?>">Edit Profile</a></li>
+                                    <li><a href="?dpage=c-password" class="<?php if($cPage == 'c-password'){ echo 'active'; } ?>">Change Password</a></li>
                                     <li><a href="/tools/#playlist-maker">Make Playlist</a></li>
                                     <li><a href="/make-listing/">Make Listing</a></li>
                                     <?php 
                                     if(!in_array('administrator', $current_user->roles)){
                                         ?>
-                                        <li><a href="?dpage=stripe-connect" class="<?php if($cPage == 'stripe-connect'){ echo 'active';} ?>">Stripe Account</a></li>
+                                        <li><a href="?dpage=stripe-connect" class="<?php if($cPage == 'stripe-connect'){ echo 'active'; } ?>">Stripe Account</a></li>
                                         <?php
                                     }
                                     ?>
@@ -75,10 +83,12 @@ if(!class_exists('HplrDashboard', false)){
                         <main class="main-content">
                             <div id="overview">
                                 <div class="hplr-dashboard-content">
+									<div class="edit-profile">
                                     <?php 
                                     if($cPage == 'profile'){
                                         ?>
-                                        <h2>Profile</h2>
+                                        <h3>Profile</h3>
+									</div>
                                         <div class="profile-card">
                                             <div class="profile-cover">
                                                 <?php 
@@ -88,7 +98,7 @@ if(!class_exists('HplrDashboard', false)){
                                                     <?php
                                                 }else{
                                                     ?>
-                                                    <img src="/wp-content/plugins/helpful-login-register/front-end/assets/img/placeholder.jpg" alt="Cover" class="cover" width='100' height='100'>
+                                                    <img src="<?= site_url() ?>/wp-content/plugins/helpful-login-register/front-end/assets/default-cover-pics/defaultCover<?= $profileRandNo ?>.jpeg" alt="Cover" class="cover" width='100' height='100'>
                                                     <?php
                                                 }
                                                 ?>
@@ -100,7 +110,7 @@ if(!class_exists('HplrDashboard', false)){
                                                     if($profile_picture){
                                                         echo '<img src="'.esc_url($profile_picture).'" class="das-u-profile" height="100" width="100" alt="Profile Picture">';
                                                     }else{
-                                                        echo '<img src="'.get_avatar_url($user_id).'" class="das-u-profile" height="100" width="100" alt="Profile Picture">';
+                                                        echo '<img src="'.site_url().'/wp-content/plugins/helpful-login-register/front-end/assets/default-profile/defaultProfilePurple.png" class="das-u-profile" height="100" width="100" alt="Profile Picture">';
                                                     }
                                                     ?>
                                                 </div>
@@ -122,7 +132,7 @@ if(!class_exists('HplrDashboard', false)){
                                                     <?php
                                                 }
                                                 ?>
-                                                <p><strong>Role:</strong> <?php echo implode(', ', $current_user->roles); ?></p>
+                                                <p><strong>Role:</strong> <span class="role-text"><?php echo implode(', ', $display_roles); ?></span></p>
                                                 <div class="profile-url-section">
                                                     <div>
                                                         <span><strong>Public Profile URL:</strong>&nbsp;<a href="<?= site_url() ?>/profile/<?= $user_id ?>/" target="_blank" class="url" id="profile-url"><?= site_url() ?>/profile/<?= $user_id ?>/</a></span>
@@ -156,7 +166,7 @@ if(!class_exists('HplrDashboard', false)){
                                                                     if($profile_picture){
                                                                         echo '<img src="'.esc_url($profile_picture).'" class="das-u-profile" height="100" width="100" alt="Profile Picture">';
                                                                     }else{
-                                                                        echo '<img src="'.get_avatar_url($user_id).'" class="das-u-profile" height="100" width="100" alt="Profile Picture">';
+                                                                        echo '<img src="'.site_url().'/wp-content/plugins/helpful-login-register/front-end/assets/default-profile/defaultProfilePurple.png" class="das-u-profile" height="100" width="100" alt="Profile Picture">';
                                                                     }
                                                                     ?>
                                                                 </div>
@@ -176,7 +186,7 @@ if(!class_exists('HplrDashboard', false)){
                                                                     if($profile_cover){
                                                                         echo '<img src="'.esc_url($profile_cover).'" class="das-u-profile-cover" height="100" width="100" alt="Profile Picture">';
                                                                     }else{
-                                                                        echo '<img src="/wp-content/plugins/helpful-login-register/front-end/assets/img/placeholder.jpg" class="das-u-profile-cover" height="100" width="100" alt="Profile Picture">';
+                                                                        echo '<img src="'.site_url().'/wp-content/plugins/helpful-login-register/front-end/assets/default-cover-pics/defaultCover'.$profileRandNo.'.jpeg" class="das-u-profile-cover" height="100" width="100" alt="Profile Picture">';
                                                                     }
                                                                     ?>
                                                                 </div>

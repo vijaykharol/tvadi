@@ -18,8 +18,11 @@ if(!class_exists('HplrFrontEnd', false)){
             //Register shortcode
             add_shortcode( 'helpful_register', [__CLASS__, 'helpful_register_cb'] );
 
-             //fortgot password shortcode
-             add_shortcode( 'helpful_forgot_password', [__CLASS__, 'helpful_forgot_password_cb'] );
+            //fortgot password shortcode
+            add_shortcode( 'helpful_forgot_password', [__CLASS__, 'helpful_forgot_password_cb'] );
+
+            //Helpful Verify Account
+            add_shortcode( 'helpful_verify_account', [__CLASS__, 'helpful_verify_account_cb'] );
 
             //Handle login Ajax Request..
             add_action( 'wp_ajax_hp_login_process', [__CLASS__, 'hp_login_process_callback'] );
@@ -32,6 +35,10 @@ if(!class_exists('HplrFrontEnd', false)){
             //Handle Forgot Password Request..
             add_action( 'wp_ajax_hp_forgotp_process', [__CLASS__, 'hp_forgotp_process_callback'] );
             add_action( 'wp_ajax_nopriv_hp_forgotp_process', [__CLASS__, 'hp_forgotp_process_callback'] );
+
+            //OTP Verification..
+            add_action( 'wp_ajax_hp_otp_verification_process', [__CLASS__, 'hp_otp_verification_process_callback'] );
+            add_action( 'wp_ajax_nopriv_hp_otp_verification_process', [__CLASS__, 'hp_otp_verification_process_callback'] );
         }
 
         /**
@@ -100,28 +107,45 @@ if(!class_exists('HplrFrontEnd', false)){
          */
         public static function hp_login_process_callback(){
             check_ajax_referer('ajax-login-nonce', 'security_nonce');
-            $username   =   (isset($_POST['username'])) ? $_POST['username'] : '';
+            $username   =   (isset($_POST['username'])) ? sanitize_text_field($_POST['username']) : '';
             $password   =   (isset($_POST['password'])) ? $_POST['password'] : '';
             $remember   =   (isset($_POST['remember']) && $_POST['remember'] === 'true') ? true : false;
 
-            $credentials = [
-                'user_login'    => $username,
-                'user_password' => $password,
-                'remember'      => $remember
-            ];
-
-            $user = wp_signon($credentials, false);
-            $return = [];
-            if(is_wp_error($user)){
-                $return['status']       =   false;
-                $return['message']      =   'Wrong username or password.';
+            if(is_email($username)){
+                $user = get_user_by('email', $username);
             }else{
-                wp_set_current_user($user->ID);
-                wp_set_auth_cookie($user->ID, true);
-                $return['status']       =   true;
-                $return['message']      =   'Login successful, redirecting...';
+                $user = get_user_by('login', $username);
             }
 
+            if($user){
+                $user_id            =   $user->ID;
+                $isVerifiedUser     =   get_user_meta($user_id, 'user_verification_status', true);
+                if(!empty($isVerifiedUser) && $isVerifiedUser == 1){
+                    $credentials = [
+                        'user_login'    => $username,
+                        'user_password' => $password,
+                        'remember'      => $remember
+                    ];
+        
+                    $signon     =   wp_signon($credentials, false);
+                    $return     =   [];
+                    if(is_wp_error($signon)){
+                        $return['status']       =   false;
+                        $return['message']      =   'Wrong username or password.';
+                    }else{
+                        wp_set_current_user($signon->ID);
+                        wp_set_auth_cookie($signon->ID, true);
+                        $return['status']       =   true;
+                        $return['message']      =   'Login successful, redirecting...';
+                    }
+                }else{
+                    $return['status']   =   false;
+                    $return['message']  =   'Your account is not verified. Please Verify your account by clicking verify. <a class="verify-account-link" href="'.site_url().'/verify-account/?id='.$user_id.'">Verify Account</a>';
+                }
+            }else{
+                $return['status']   =   false;
+                $return['message']  =   'User does not exist.';
+            }
             echo json_encode($return);
             exit;
         }
@@ -134,7 +158,8 @@ if(!class_exists('HplrFrontEnd', false)){
             if(!is_user_logged_in()){
                 ?>
                 <div class="helpful-register-form">
-                    <form id="custom-registration-form" action="" method="post">
+                    <!-- Registration Form -->
+                    <form id="custom-registration-form" action="" method="POST">
                         <div class="row">
                             <div class="col-12 col-lg-12">
                                 <div class="form-group">
@@ -192,6 +217,41 @@ if(!class_exists('HplrFrontEnd', false)){
                             <div class="col-12 col-lg-12">
                                 <div class="form-group">
                                     <button id="hplr-register-btn" class="btn btn-primary btn-large">Register</button>
+                                </div>
+                            </div>
+                            <div class="col-12 col-lg-12">
+                                <div class="form-group mb-0">
+                                    <div class="form-bottom-actions">
+                                        <p>If you already Have an account?<a href="<?= site_url() ?>/login/"> Login</a></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <!-- OTP Verication Form -->
+                    <form action="" id="custom-register-otp-verification" method="POST" style="display: none;">
+                        <div class="row">
+                            <div class="col-12 col-lg-12">
+                                <div class="form-group">
+                                    <div id="o-success" style="display:none;"></div>
+                                    <div id="o-error" style="display:none;"></div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="registered_user_id" id="registered-user-id">
+                            <div class="col-12 col-lg-12">
+                                <div class="form-group">
+                                    <span class="frndly-msg">Please enter the OTP we’ve sent to your email address.</span>
+                                </div>
+                            </div>
+                            <div class="col-12 col-lg-12">
+                                <div class="form-group">
+                                    <label for="otp_number">Enter OTP(6 Digit) Number <span style="color:red;">*</span></label>
+                                    <input type="text" name="otp_number" id="otp_number" maxlength="6">
+                                </div>
+                            </div>
+                            <div class="col-12 col-lg-12">
+                                <div class="form-group">
+                                    <button id="submit-otp-register-btn" class="btn btn-primary btn-large">Submit</button>
                                 </div>
                             </div>
                             <div class="col-12 col-lg-12">
@@ -273,20 +333,139 @@ if(!class_exists('HplrFrontEnd', false)){
                     update_user_meta($user_id, 'first_name', $firstname);
                     update_user_meta($user_id, 'last_name', $lastname);
 
+                    $otp = rand(100000, 999999);
+                    update_user_meta($user_id, 'user_verification_status', 0);
+                    update_user_meta($user_id, 'verification_otp', $otp);
+
+                    //Admin email
                     $admin_email    =   get_option('admin_email');
                     $subject        =   'New User Registration';
                     $message        =   'A new user has registered on your website. Username: ' .$username. ', Email: ' .$email. ', User type: '.$user_role;
                     $mail           =   wp_mail($admin_email, $subject, $message);
 
+                    //User email
+                    $site_name      =   get_bloginfo('name');
+                    $subject2       =   'Your OTP Verification Code for '.$site_name.'';
+                    $message2       =   "
+                        <!DOCTYPE html>
+                        <html lang='en'>
+                        <head>
+                            <meta charset='UTF-8'>
+                            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                            <title>OTP Verification</title>
+                        </head>
+                        <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
+                            <table width='100%' cellpadding='0' cellspacing='0' border='0'>
+                                <tr>
+                                    <td style='padding: 20px;'>
+                                        <h2 style='color: #333;'>Dear ".$firstname." ".$lastname.",</h2>
+                                        <p>Thank you for signing up at <strong>".$site_name."</strong>. To complete your registration, please verify your email address by entering the following One-Time Password (OTP) in the verification field:</p>
+                                        <p style='font-size: 24px; font-weight: bold; color: #007BFF;'>Your OTP Code: ".$otp."</p>
+                                        <p>If you did not initiate this request, please disregard this email.</p>
+                                        <p>Thank you for choosing <strong>".$site_name."</strong>.</p>
+                                        <p>Best regards,<br>
+                                        <strong>".$site_name." Team</strong></p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </body>
+                        </html>
+                    ";
+                    //Send Email To User
+                    $mail2                  =   wp_mail($email, $subject2, $message2);
+
                     $return['status']       =   true;
-                    $return['message']      =   'Registration successful!';
+                    $return['message']      =   'Thank you for signing up! Please check your email for the One-Time Password (OTP) to complete your registration.';
                     $return['redirecturl']  =   site_url().'/login/';
+                    $return['user_id']      =   $user_id;
                 }
             }
             echo json_encode($return);
             exit();
         }
 
+        public static function hp_otp_verification_process_callback(){
+            $otp        =   (isset($_POST['otp_number']))            ?   $_POST['otp_number']            : '';
+            $user_id    =   (isset($_POST['registered_user_id']))    ?   $_POST['registered_user_id']    : '';
+            $return     =   [];
+            if(empty($otp)){
+                $return['status']   =   false;
+                $return['msg']      =   'Please fill out all required fields!';
+            }else if(empty($user_id)){
+                $return['status']   =   false;
+                $return['msg']      =   'Oop\'s Something went wrong please try after some time. Thank You!';
+            }else{
+                
+                $userotp = get_user_meta($user_id, 'verification_otp', $otp);
+                if($userotp === $otp){
+                    update_user_meta($user_id, 'user_verification_status', 1);
+                    delete_user_meta($user_id, 'verification_otp');
+                    $return['status']   =   true;
+                    $return['msg']      =   'Registration successfully completed. Redirecting...';
+                    $return['url']      =   site_url().'/login';
+                }else{
+                    $return['status']   =   false;
+                    $return['msg']      =   'Wrong OTP!';
+                }
+            }
+            echo json_encode($return);
+            exit;
+        }
+
+        /**
+         * VERIFY ACCOUNT
+         */
+        public static function helpful_verify_account_cb(){
+            $user_id = (isset($_GET['id'])) ? $_GET['id'] : '';
+            ob_start();
+            if(!is_user_logged_in() && !empty($user_id)){
+                ?>
+                <div class="helpful-register-form">
+                    <form action="" id="custom-register-otp-verification" method="POST">
+                        <div class="row">
+                            <div class="col-12 col-lg-12">
+                                <div class="form-group">
+                                    <div id="o-success" style="display:none;"></div>
+                                    <div id="o-error" style="display:none;"></div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="registered_user_id" id="registered-user-id" value="<?= $user_id ?>">
+                            <div class="col-12 col-lg-12">
+                                <div class="form-group">
+                                    <span class="frndly-msg">Please enter the OTP we’ve sent to your email address.</span>
+                                </div>
+                            </div>
+                            <div class="col-12 col-lg-12">
+                                <div class="form-group">
+                                    <label for="otp_number">Enter OTP(6 Digit) Number <span style="color:red;">*</span></label>
+                                    <input type="text" name="otp_number" id="otp_number" maxlength="6">
+                                </div>
+                            </div>
+                            <div class="col-12 col-lg-12">
+                                <div class="form-group">
+                                    <button id="submit-otp-register-btn" class="btn btn-primary btn-large">Submit</button>
+                                </div>
+                            </div>
+                            <div class="col-12 col-lg-12">
+                                <div class="form-group mb-0">
+                                    <div class="form-bottom-actions">
+                                        <p>If you already Have an account?<a href="<?= site_url() ?>/login/"> Login</a></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <?php
+            }else{
+                ?>
+               <script>
+                window.location.href = "<?= site_url() ?>/dashboard/?dpage=edit-profile";
+               </script>
+               <?php
+            }
+            return ob_get_clean();
+        }
         /**
          * Forgot password 
          */
